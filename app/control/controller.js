@@ -2,23 +2,59 @@ import {controlModel} from './index'
 
 
 const controller = {
-    createUser(req,res){
+
+    showTemp(req,res){
+      //console.log(req)
+      const t = req.query.temp
+      console.log(t)
+      res.send('success : ' + t)
+
+      controlModel.insertTest(t)
       
+      //controlModel.showTemp(t).then(data)
+      // const t = req.body.temp
+      // console.log(t)
+      // res.send(req.body)
     },
+  //   createUser(req,res){
+  //     // const { 
+  //     //   device_name,
+  //     //   device_room,
+  //     //   wifi_user,
+  //     //   wifi_pass } = req.body //รับค่า
+  //     const data = {
+  //       name,
+  //       room,
+  //       wifi_name,
+  //       wifi_pass } = req.body
+        
+  //       res.status(201).json(data)
+
+        
+
+  //   //res.status(200).json(data)
+  //  //รับค่า
+  //   //     const temp = req.users.temp
+  //   //     //
+  //   // controlModel.createUser(
+  //   //   device_name,
+  //   //   device_room,
+  //   //   wifi_user,
+  //   //   wifi_pass ).then(controlModel => {
+  //   //     res.status(201).json(controlModel)
+  //   //   })
+  //   },
 
     getName(req,res){
-      const temp = req.params.name //รับค่าจาก url เป็น params
-      //const temp = req.name
-      console.log(temp)
-      controlModel.getName(temp).then((data) => {  //ส่งข้อมูลจาก getName(temp) กลับมาแสดงจาก Database
+      const reqID = req.params.id //รับค่าจาก url เป็น params
+      //const reqID = req.name
+      console.log(reqID)
+      controlModel.getName(reqID).then((data) => {  //ส่งข้อมูลจาก getName(temp) กลับมาแสดงจาก Database
         res.status(200).json({ "device_name": data }) 
       //res.status(200).json({ "device_name": "Suchada", "device_room": "Bedroom" })
-      })
-      
+      })     
     }
-
 }
-
 export default controller 
 
 

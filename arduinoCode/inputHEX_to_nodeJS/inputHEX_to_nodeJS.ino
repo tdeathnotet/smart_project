@@ -2,14 +2,14 @@
 #include <IRremoteESP8266.h>
 #include <IRsend.h>
 #include "ESP8266WiFi.h"
+//
+//const char* MY_SSID = "icute3";
+//const char* MY_PWD =  "thinkbeyond03";
+//const char WEBSITE[] = "192.168.1.17";
 
-const char* MY_SSID = "icute3";
-const char* MY_PWD =  "thinkbeyond03";
-const char WEBSITE[] = "192.168.1.17";
-
-//const char* MY_SSID = "26SW_AIS2.4G";
-//const char* MY_PWD =  "58543206";
-//const char WEBSITE[] = "192.168.1.116";
+const char* MY_SSID = "26SW_AIS2.4G";
+const char* MY_PWD =  "58543206";
+const char WEBSITE[] = "192.168.1.113";
 String inStringHex = "";
 int lastStringLength;
 
@@ -85,6 +85,7 @@ void loop() {
         Serial.println(inStringHex);
         Serial.println((String)inStringHex);
         String request =  String(command,HEX); //แปลงค่าจาก intฐาน16 เป็น string ,HEX
+        //request =  "0, 4494, 558, 574, 560, 1678, 584, 548, 558, 550, 584, 546, 532, 598, 562, 548, 584, 542, 582, 1660, 586, 542, 558, 1684, 556, 1702, 562, 1676"; //แปลงค่าจาก intฐาน16 เป็น string ,HEX
         client.print("POST /control/api/temp?temp=" + request); //ส่งค่า request ผ่าน post
         client.println(" HTTP/1.1"); 
         client.print("Host: ");

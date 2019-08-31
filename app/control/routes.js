@@ -3,10 +3,9 @@ import controller from './controller'
 
 
 export function setup(router){
-    router.get('/:name',controller.getName) , //url = http://localhost:4000/controller/mashiro
-    router.post('/add',controller.createUser),
-    router.delete('/delete/:id')
-
+    router.post('/api/temp',controller.showTemp)
+    router.get('/:id',controller.getName)  //url = http://localhost:4000/controller/mashiro
+    // router.delete('/delete/:id')
 }
 //'use strict';
 /* module.exports = function(app){

@@ -2,9 +2,7 @@
 var sql = require('../db');
 import pool from '../db' 
 
-
 const controlModel = {
-    
     getName(name){
         return new Promise((resolve,reject) => {
             pool.query('SELECT * FROM `devices` WHERE `device_id` = ?',[name],
@@ -16,8 +14,27 @@ const controlModel = {
             )
         }) //callback function
     },
-    getAllUser(){
-
+    createUser(users){
+        
+        return new Promise ((resolve , reject) =>{
+            pool.query('INSERT INTO `devices`(`device_name`, `device_room`, `wifi_user`, `wifi_pass`) VALUES ? ',[users],
+            function(error,results,fields){
+                if(error) throw error;
+                console.log(results)
+                return resolve(results)
+            })
+        })
+    },
+    insertTest(temp){
+        return new Promise((resolve , reject) => {
+            //const tem = { air_power: 'Winnie', air_tempUp: 'Australia' };
+            pool.query('INSERT INTO `remote_air`(air_power,air_tempUp) VALUES (?,?)',[temp,temp], 
+            function(err,result,fields){
+                if(err) throw err;
+                console.log("1 record ")
+                return resolve(result)
+            })
+        })
     }
 }
 
