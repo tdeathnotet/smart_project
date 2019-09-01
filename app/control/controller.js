@@ -7,7 +7,7 @@ const controller = {
       //console.log(req)
       const t = req.query.temp
       console.log(t)
-      res.send('success : ' + t)
+      //res.send('success : ' + t)
 
       controlModel.insertTest(t)
       
@@ -15,6 +15,11 @@ const controller = {
       // const t = req.body.temp
       // console.log(t)
       // res.send(req.body)
+    },
+    showJson(req,res){
+      console.log(req.body)
+      //console.log(JSON.stringify(j))
+     controlModel.addDevice(req.body)
     },
   //   createUser(req,res){
   //     // const { 

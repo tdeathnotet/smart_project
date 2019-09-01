@@ -35,6 +35,17 @@ const controlModel = {
                 return resolve(result)
             })
         })
+    },
+    addDevice({command}){
+        return new Promise((resolve , reject) => {
+            //const tem = { air_power: 'Winnie', air_tempUp: 'Australia' };
+            pool.query('INSERT INTO `remote_air`(air_power) VALUES (?)',[command], 
+            function(err,result,fields){
+                if(err) throw err;
+                console.log("1 record ")
+                return resolve(result)
+            })
+        })
     }
 }
 

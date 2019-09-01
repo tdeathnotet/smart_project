@@ -4,6 +4,7 @@ import controller from './controller'
 
 export function setup(router){
     router.post('/api/temp',controller.showTemp)
+    router.post('/api/jsonn',controller.showJson)
     router.get('/:id',controller.getName)  //url = http://localhost:4000/controller/mashiro
     // router.delete('/delete/:id')
 }
