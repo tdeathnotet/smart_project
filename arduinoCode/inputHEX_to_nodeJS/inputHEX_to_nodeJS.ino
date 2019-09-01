@@ -7,9 +7,9 @@
 //const char* MY_PWD =  "thinkbeyond03";
 //const char WEBSITE[] = "192.168.1.17";
 
-const char* MY_SSID = "26SW_AIS2.4G";
+const char* MY_SSID = "26SW_WIFI_2.4G";
 const char* MY_PWD =  "58543206";
-const char WEBSITE[] = "192.168.1.113";
+const char WEBSITE[] = "192.168.1.2";
 String inStringHex = "";
 int lastStringLength;
 
