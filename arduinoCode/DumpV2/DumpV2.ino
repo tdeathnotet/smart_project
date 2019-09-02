@@ -11,6 +11,9 @@
 const char* MY_SSID = "icute3";
 const char* MY_PWD =  "thinkbeyond03";
 
+String tv_On = "",tv_volUp = "",tv_volDown = "";
+    int bufferSize;
+
 //const char* MY_SSID = "26SW_WIFI_2.4G";
 //const char* MY_PWD =  "58543206";
 
@@ -45,58 +48,94 @@ decode_results results;  // Somewhere to store the results
 
 
 void setup() {
-  Serial.begin(kBaudRate);
-  #if defined(ESP8266)
-    Serial.begin(kBaudRate, SERIAL_8N1, SERIAL_TX_ONLY);
-  #else  // ESP8266
-    Serial.begin(kBaudRate, SERIAL_8N1);
-  #endif  // ESP8266
-    while (!Serial)  // Wait for the serial connection to be establised.
-      delay(50);
+
+  Serial.begin(115200);
+//  #if defined(ESP8266)
+//    Serial.begin(kBaudRate, SERIAL_8N1, SERIAL_TX_ONLY);
+//  #else  // ESP8266
+//    Serial.begin(kBaudRate, SERIAL_8N1);
+//  #endif  // ESP8266
+//    while (!Serial)  // Wait for the serial connection to be establised.
+//      delay(50);
+    Serial.printf("\nIRrecvDumpV2 is now running and waiting for IR input on Pin "
+                  "%d\n", kRecvPin);
   #if DECODE_HASH
+    // Ignore messages with less than minimum on or off pulses.
     irrecv.setUnknownThreshold(kMinUnknownSize);
   #endif                  // DECODE_HASH
     irrecv.enableIRIn();  // Start the receiver
-
     
-  Serial.print("Connecting to "+*MY_SSID);
-  WiFi.begin(MY_SSID, MY_PWD);
-  Serial.println("going into wl connect");
-
-  while (WiFi.status() != WL_CONNECTED){
-      delay(500);
-      Serial.print(".");
-  }
-  Serial.println("wl connected");
-  Serial.println("");
-  Serial.println("WIFI connected\n ");
-  Serial.println("");
-  
-  irsend.begin();
+//  Serial.print("Connecting to "+*MY_SSID);
+//  WiFi.begin(MY_SSID, MY_PWD);
+//  Serial.println("going into wl connect");
+//
+//  while (WiFi.status() != WL_CONNECTED){
+//      delay(500);
+//      Serial.print(".");
+//  }
+//  Serial.println("wl connected");
+//  Serial.println("");
+//  Serial.println("WIFI connected\n ");
+//  Serial.println("");
+//  
+//  irsend.begin();
+    Serial.println("Select the remote that you want to decoder : ");
+    Serial.println("1. TV remote");
+    Serial.println("2. AC remote");
 }
 
 
 
 void loop() {
 
-  if (irrecv.decode(&results)) {
-   //rawLengthData----------------------------------------------------------------
-    Serial.println("");
-    int bufferSize = uint64ToString(getCorrectedRawLength(&results), 10).toInt();
-    uint16_t command[bufferSize];
 
- //rawData------------------------------------------------------------------
-     //Serial.print("&results :"); 
-     String rawData = resultToSourceCode(&results);
+    while(Serial.available()){
+      char input = Serial.read();
+    switch (input) {
+      case '1':{
+        Serial.println("You Select TV remote & Enter your Enncode"); //TV On-off 
+        bufferSize = uint64ToString(getCorrectedRawLength(&results), 10).toInt();
+        tv_On = resultToSourceCode(&results);
+        yield();
 
-     Serial.print("rawData[");Serial.print(bufferSize);Serial.print("] :");
-     Serial.println(rawData);
-     Serial.print("sendJSON[");Serial.print(bufferSize);Serial.print("] :");
-     httpJSON(rawData);  //ส่งJSON ไปยัง http
-     toIntArray(rawData,bufferSize,command);  //ฟังก์ชั้น Char* to Int Array  
+        while(irrecv.decode(&results) != 0) {
+//        uint32_t now = millis();
+//        Serial.printf("Timestamp : %06u.%03u\n", now / 1000, now % 1000);
+          // Feed the WDT as the text output can take a while to print.
+          // uint16_t command[bufferSize];
+          //Serial.print(".");
+          Serial.print("tv_On[");Serial.print(bufferSize);Serial.print("] :");Serial.println(tv_On);
+          yield();
+          Serial.println("Decoder Success!!"); 
+        }
 
-     //irsend.sendRaw(command,bufferSize, 38);  // Send a raw data capture at 38kHz.
+      }break;
+      }
+      Serial.println("");
+
+//    default:
+//      break;
   }
+
+
+//   if (irrecv.decode(&results)) {
+//    //rawLengthData----------------------------------------------------------------
+//     Serial.println("");
+//     int bufferSize = uint64ToString(getCorrectedRawLength(&results), 10).toInt();
+//     uint16_t command[bufferSize];
+
+//  //rawData------------------------------------------------------------------
+//      //Serial.print("&results :"); 
+//      String rawData = resultToSourceCode(&results);
+
+//      Serial.print("rawData[");Serial.print(bufferSize);Serial.print("] :");
+//      Serial.println(rawData);
+//      Serial.print("sendJSON[");Serial.print(bufferSize);Serial.print("] :");
+//      httpJSON(rawData);  //ส่งJSON ไปยัง http
+//      toIntArray(rawData,bufferSize,command);  //ฟังก์ชั้น Char* to Int Array  
+
+//      //irsend.sendRaw(command,bufferSize, 38);  // Send a raw data capture at 38kHz.
+//   }
     
 }
 
