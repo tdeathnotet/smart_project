@@ -12,7 +12,7 @@ const char* MY_SSID = "icute3";
 const char* MY_PWD =  "thinkbeyond03";
 
 String tv_On = "",tv_volUp = "",tv_volDown = "";
-int buffOn,buffVolUp,buffVolDown; //buffer botton decoder
+    int bufferSize;
 
 //const char* MY_SSID = "26SW_WIFI_2.4G";
 //const char* MY_PWD =  "58543206";
@@ -45,7 +45,8 @@ IRrecv irrecv(kRecvPin, kCaptureBufferSize, kTimeout, true);
 decode_results results;  // Somewhere to store the results
 
 
-int count=0;
+char input;
+
 void setup() {
 
   Serial.begin(115200);
@@ -57,80 +58,52 @@ void setup() {
   #endif                  // DECODE_HASH
     irrecv.enableIRIn();  // Start the receiver
     
-  Serial.print("Connecting to "+*MY_SSID);
-  WiFi.begin(MY_SSID, MY_PWD);
-  Serial.println("going into wl connect");
-
-  while (WiFi.status() != WL_CONNECTED){
-      delay(500);
-      Serial.print(".");
-  }
-  Serial.println("wl connected");
-  Serial.println("");
-  Serial.println("WIFI connected\n ");
-  Serial.println("");
+//  Serial.print("Connecting to "+*MY_SSID);
+//  WiFi.begin(MY_SSID, MY_PWD);
+//  Serial.println("going into wl connect");
+//
+//  while (WiFi.status() != WL_CONNECTED){
+//      delay(500);
+//      Serial.print(".");
+//  }
+//  Serial.println("wl connected");
+//  Serial.println("");
+//  Serial.println("WIFI connected\n ");
+//  Serial.println("");
 //  
-
-
+//  irsend.begin();
 
     Serial.println("Select the remote & decoder : ");
     Serial.println("1. TV remote");
     Serial.println("2. AC remote");
-//    irsend.begin();
+    while(Serial.available()){
+      input = Serial.read();
+      if( input == '1')
+        Serial.println("You Select TV remote & Enter your Enncode");   
+      else if(input == '2')
+        Serial.println("You Select AC remote & Enter your Enncode");
+    }
 }
 
 
-
 void loop() {
-
+//  int input;
     if(irrecv.decode(&results)) {
-      if(Serial.available()){
-        char input = Serial.read();
- /*----------------------------------Decode Tv remote Button ON-----------------------------------------*/       
-         if( input == '1'){  
-            Serial.println("You Select TV remote & Decoder Button ON ");  
-            buffOn = uint64ToString(getCorrectedRawLength(&results), 10).toInt();
+         if( input == '1'){
+            bufferSize = uint64ToString(getCorrectedRawLength(&results), 10).toInt();
             tv_On = resultToSourceCode(&results);// Feed the WDT as the text output can take a while to print.
-            count += 1;
-//            yield(); 
+            yield(); 
+            
+            uint32_t now = millis();
+            Serial.printf("Timestamp : %06u.%03u\n", now / 1000, now % 1000);
             // uint16_t command[bufferSize];
-            Serial.print("tv_On[");Serial.print(buffOn);Serial.print("] :");Serial.println(tv_On);
-            //yield(); 
+            Serial.print("tv_On[");Serial.print(bufferSize);Serial.print("] :");Serial.println(tv_On);
             Serial.println("Decoder Success!!"); Serial.println("");      
-          }
- /*----------------------------------Decode Tv remote Button VOL + -----------------------------------------*/             
-          else if( input == '2'){   
-            Serial.println("You Select TV remote & Decoder Button Vol +");
-            buffVolUp = uint64ToString(getCorrectedRawLength(&results), 10).toInt();
-            tv_volUp = resultToSourceCode(&results);// Feed the WDT as the text output can take a while to print.
-            count += 1;
-//            yield(); 
-            // uint16_t command[bufferSize];
-            Serial.print("tv_volUp[");Serial.print(buffVolUp);Serial.print("] :");Serial.println(tv_volUp);
-            //yield(); 
-            Serial.println("Decoder Success!!"); Serial.println("");      
-          } 
-  /*----------------------------------Decode Tv remote Button VOL - -----------------------------------------*/     
-           else if( input == '3'){   
-            Serial.println("You Select TV remote & Decoder Button Vol -");
-            buffVolDown = uint64ToString(getCorrectedRawLength(&results), 10).toInt();
-            tv_volDown = resultToSourceCode(&results);// Feed the WDT as the text output can take a while to print.
-            count += 1;
-            // uint16_t command[bufferSize];
-            Serial.print("tv_volDown[");Serial.print(buffVolDown);Serial.print("] :");Serial.println(tv_volDown);
-            //yield(); 
-            Serial.println("Decoder Success!!"); Serial.println("");      
-          }   
-          else{
-            Serial.println("Enter Button Again");
-          }
-    }
-      if(count == 3){
-        httpJSON(); 
-        count = 0;
-      }
-  } 
-
+            }else if( input == '2'){   
+              Serial.println("You Select AC remote & Enter your Enncode");
+      } 
+    
+  }
 //    if(Serial.available()){
 //        input = Serial.read();
 //        if(input == '1')
@@ -178,14 +151,13 @@ int toIntArray(String str,int buffSize ,uint16_t* command){
         Serial.print(", "); //โชว์ data ของ command แต่ละตัว
     }
 }
-void httpJSON(){
+void httpJSON(String rawData){
       //_____________________JSON HTTP___________________________________________________________________________
     if (WiFi.status() == WL_CONNECTED) { //Check WiFi connection status
       StaticJsonBuffer<3000> JSONbuffer;   //Declaring static JSON buffer
       JsonObject& JSONencoder = JSONbuffer.createObject(); 
-      JSONencoder["ON"] = tv_On;    //input String to Json
-      JSONencoder["vol+"] = tv_volUp;
-      JSONencoder["vol-"] = tv_volDown;  
+      JSONencoder["ON"] = rawData;    //input String to Json
+      JSONencoder["volUP"] = rawData;   
       char JSONmessageBuffer[3000];
       JSONencoder.prettyPrintTo(JSONmessageBuffer, sizeof(JSONmessageBuffer));
       Serial.println(JSONmessageBuffer);
