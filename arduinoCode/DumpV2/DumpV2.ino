@@ -29,7 +29,7 @@ IRsend irsend(kIrLed);  // Set the GPIO to be used to sending the message.
 
 //void convertStrtoArr();
 int toIntArray();
-void httpJSON();
+String httpJSON();
 
 
 #if DECODE_AC
@@ -45,7 +45,7 @@ IRrecv irrecv(kRecvPin, kCaptureBufferSize, kTimeout, true);
 decode_results results;  // Somewhere to store the results
 
 
-int count=0;
+int count = 0;
 void setup() {
 
   Serial.begin(115200);
@@ -82,7 +82,6 @@ void setup() {
 
 
 void loop() {
-
     if(irrecv.decode(&results)) {
       if(Serial.available()){
         char input = Serial.read();
@@ -95,8 +94,9 @@ void loop() {
 //            yield(); 
             // uint16_t command[bufferSize];
             Serial.print("tv_On[");Serial.print(buffOn);Serial.print("] :");Serial.println(tv_On);
-            //yield(); 
-            Serial.println("Decoder Success!!"); Serial.println("");      
+            yield(); 
+            Serial.println("Decoder Success!!"); Serial.println("");  
+            httpJSON("tv_On",tv_On);
           }
  /*----------------------------------Decode Tv remote Button VOL + -----------------------------------------*/             
           else if( input == '2'){   
@@ -107,8 +107,9 @@ void loop() {
 //            yield(); 
             // uint16_t command[bufferSize];
             Serial.print("tv_volUp[");Serial.print(buffVolUp);Serial.print("] :");Serial.println(tv_volUp);
-            //yield(); 
-            Serial.println("Decoder Success!!"); Serial.println("");      
+            yield(); 
+            Serial.println("Decoder Success!!"); Serial.println("");
+            httpJSON("tv_volUp",tv_volUp);      
           } 
   /*----------------------------------Decode Tv remote Button VOL - -----------------------------------------*/     
            else if( input == '3'){   
@@ -118,18 +119,16 @@ void loop() {
             count += 1;
             // uint16_t command[bufferSize];
             Serial.print("tv_volDown[");Serial.print(buffVolDown);Serial.print("] :");Serial.println(tv_volDown);
-            //yield(); 
-            Serial.println("Decoder Success!!"); Serial.println("");      
+            yield(); 
+            Serial.println("Decoder Success!!"); Serial.println("");
+            httpJSON("tv_volDown",tv_volDown);     
           }   
           else{
             Serial.println("Enter Button Again");
           }
     }
-      if(count == 3){
-        httpJSON(); 
-        count = 0;
-      }
-  } 
+
+} 
 
 //    if(Serial.available()){
 //        input = Serial.read();
@@ -178,14 +177,17 @@ int toIntArray(String str,int buffSize ,uint16_t* command){
         Serial.print(", "); //โชว์ data ของ command แต่ละตัว
     }
 }
-void httpJSON(){
+String httpJSON(String Data,String rawData){ 
+
       //_____________________JSON HTTP___________________________________________________________________________
     if (WiFi.status() == WL_CONNECTED) { //Check WiFi connection status
       StaticJsonBuffer<3000> JSONbuffer;   //Declaring static JSON buffer
       JsonObject& JSONencoder = JSONbuffer.createObject(); 
-      JSONencoder["ON"] = tv_On;    //input String to Json
-      JSONencoder["vol+"] = tv_volUp;
-      JSONencoder["vol-"] = tv_volDown;  
+
+      
+      JSONencoder[Data] = rawData;    //input String to Json 
+      //JSONencoder["Button"] = "TV_ON"; 
+      
       char JSONmessageBuffer[3000];
       JSONencoder.prettyPrintTo(JSONmessageBuffer, sizeof(JSONmessageBuffer));
       Serial.println(JSONmessageBuffer);
@@ -193,7 +195,6 @@ void httpJSON(){
       http.begin("http://192.168.1.13:4000/control/api/jsonn");      //ปลายทางที่เราจะส่ง JSONไป
       http.addHeader("Content-Type", "application/json");  //Specify content-type header
 
-  
       int httpCode = http.POST(JSONmessageBuffer);   //Send the request
       String payload = http.getString();                                        //Get the response payload
       Serial.print("httpCode :");
