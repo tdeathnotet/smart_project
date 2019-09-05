@@ -36,10 +36,10 @@ const controlModel = {
             })
         })
     },
-    addDevice({command}){
+    addTV_remote({tv_On}){
         return new Promise((resolve , reject) => {
             //const tem = { air_power: 'Winnie', air_tempUp: 'Australia' };
-            pool.query('INSERT INTO `remote_air`(air_power) VALUES (?)',[command], 
+            pool.query('INSERT INTO `tv_remote` (On) VALUES (?)',[tv_On], 
             function(err,result,fields){
                 if(err) throw err;
                 console.log("1 record ")

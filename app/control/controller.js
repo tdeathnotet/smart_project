@@ -8,9 +8,7 @@ const controller = {
       const t = req.query.temp
       console.log(t)
       //res.send('success : ' + t)
-
       controlModel.insertTest(t)
-      
       //controlModel.showTemp(t).then(data)
       // const t = req.body.temp
       // console.log(t)
@@ -19,7 +17,7 @@ const controller = {
     showJson(req,res){
       //console.log(req)
       console.log(req.body)
-      //controlModel.addDevice(req.body)
+      //controlModel.addTV_remote(req.body)  //ส่งข้อมูลไปเก็บยัง mySQL
     },
     getName(req,res){
       const reqID = req.params.id //รับค่าจาก url เป็น params

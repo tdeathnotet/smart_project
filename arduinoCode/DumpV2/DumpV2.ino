@@ -75,17 +75,18 @@ String httpJSON(String Data,String rawData){
       JSONencoder.prettyPrintTo(JSONmessageBuffer, sizeof(JSONmessageBuffer));
       Serial.println(JSONmessageBuffer);
       HTTPClient http;
-      http.begin("http://192.168.1.18:4000/control/api/jsonn");      //ปลายทางที่เราจะส่ง JSONไป
+      http.begin("http://192.168.1.24:4000/control/api/json");      //ปลายทางที่เราจะส่ง JSONไป
       http.addHeader("Content-Type", "application/json");  //Specify content-type header
 
-      int httpCode = http.POST(JSONmessageBuffer);   //Send the request
-      String payload = http.getString();                                        //Get the response payload
-      Serial.print("httpCode :");
-      Serial.println(httpCode);   //Print HTTP return code
-      Serial.println(payload);    //Print request response payload
-//      http.POST(JSONmessageBuffer);
-//      http.getString(); 
+//      int httpCode = http.POST(JSONmessageBuffer);   //Send the request
+//      String payload = http.getString();                                        //Get the response payload
+//      Serial.print("httpCode :");
+//      Serial.println(httpCode);   //Print HTTP return code
+//      Serial.println(payload);    //Print request response payload
+      http.POST(JSONmessageBuffer);
+      http.getString(); 
       http.end();  //Close connection
+      
     }else {
       Serial.println("Error in WiFi connection"); 
     }
@@ -118,10 +119,6 @@ void setup() {
   Serial.println("");
   Serial.println("WIFI connected\n ");
   Serial.println("");
-//  
-
-
-
     Serial.println("--------- DECOD TV REMOTE-------------");
     
     Serial.println("Enter ' 0 ' ON Button ");
@@ -135,21 +132,16 @@ void setup() {
     Serial.println("Enter ' 9 ' CH ▲ Button");
     Serial.println("Enter ' 3 ' CH ▼ Button");
     Serial.println("Enter ' 1 ' ↺Return,Exit Button");
-    Serial.println("Enter ' 7 ' Mute Button");
-    
-    
-
-    
-    
+    Serial.println("Enter ' 7 ' Mute Button");  
 //    irsend.begin();
 }
 
-
+char input;
 
 void loop() {
     if(irrecv.decode(&results)) {
       if(Serial.available()){
-        char input = Serial.read();
+          input = Serial.read();
 //___________________________________________________TV REMOTE__________________________________________________
         
  /*----------------------------------Decode Tv remote  ' 0 ' ON Button-----------------------------------------*/       
@@ -286,42 +278,8 @@ void loop() {
             Serial.println("Decoder Success!!"); Serial.println("");
             httpJSON("tv_Mute",tv_Mute);     
           }
-
-          else{
-            Serial.println("Enter Button Again.... ");
-          }
-    }
-
-  } 
-
- /*
-             uint16_t rawData[233] = {590, 17808,  3026, 8946,  482, 508,  558, 1460,  470, 498,  512, 482,  520, 474,  520, 474,  522, 472,  520, 474,  522, 474,  522, 1494,  494, 476,  520, 478,  516, 1494,  494, 498,  496, 500,  492, 1522,  496, 1494,  472, 1518,  518, 1472,  496, 1494,  494, 474,  520, 474,  520, 474,  522, 474,  520, 474,  520, 476,  518, 500,  496, 478,  516, 498,  498, 498,  494, 502,  514, 482,  552, 440,  522, 472,  490, 506,  516, 478,  522, 472,  522, 474,  520, 472,  522, 474,  520, 472,  522, 474,  520, 474,  520, 476,  518, 498,  496, 478,  516, 498,  498, 500,  494, 500,  516, 476,  556, 442,  522, 474,  490, 1526,  494, 1496,  496, 1494,  496, 1494,  494, 2976,  2996, 8948,  518, 1496,  496, 478,  516, 498,  496, 464,  532, 500,  486, 510,  544, 450,  552, 442,  494, 500,  490, 1524,  496, 474,  522, 472,  522, 1494,  494, 474,  522, 1494,  494, 1494,  496, 478,  516, 1494,  496, 1520,  468, 1522,  526, 442,  496, 1518,  490, 478,  520, 1496,  496, 1494,  494, 474,  520, 474,  522, 472,  544, 1470,  496, 1494,  496, 1494,  522, 474,  496, 500,  512, 482,  552, 442,  522, 470,  492, 1524,  496, 474,  544, 448,  546, 1468,  496, 1494,  494, 1494,  520, 452,  542, 1470,  520, 1470,  498, 496,  496, 502,  542, 452,  550, 444,  496, 498,  494, 502,  490, 504,  544, 1472,  492, 1496,  494, 1494,  496, 1494,  496};  // SAMSUNG_AC
-             uint8_t state[14] = {0x02, 0x92, 0x0F, 0x00, 0x00, 0x00, 0xF0, 0x01, 0xD2, 0xAE, 0x71, 0x90, 0x1B, 0xF0};
-
-             */
-//    if(Serial.available()){
-//        input = Serial.read();
-//        if(input == '1')
-//          Serial.println("You Select TV remote & Enter your Enncode");    
-//    }
-
-//   if (irrecv.decode(&results)) {
-//    //rawLengthData----------------------------------------------------------------
-//     Serial.println("");
-//     int bufferSize = uint64ToString(getCorrectedRawLength(&results), 10).toInt();
-//     uint16_t command[bufferSize];
-
-//  //rawData------------------------------------------------------------------
-//      //Serial.print("&results :"); 
-//      String rawData = resultToSourceCode(&results);
-
-//      Serial.print("rawData[");Serial.print(bufferSize);Serial.print("] :");
-//      Serial.println(rawData);
-//      Serial.print("sendJSON[");Serial.print(bufferSize);Serial.print("] :");
-//      httpJSON(rawData);  //ส่งJSON ไปยัง http
-//      toIntArray(rawData,bufferSize,command);  //ฟังก์ชั้น Char* to Int Array  
-
-//      //irsend.sendRaw(command,bufferSize, 38);  // Send a raw data capture at 38kHz.
-//   }
-    
+          //int timeout = millis();
+          Serial.println("Next Button Encoder ");  
+      }
+   }    
 }
