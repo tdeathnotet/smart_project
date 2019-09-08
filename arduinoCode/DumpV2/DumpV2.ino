@@ -8,14 +8,14 @@
 #include <IRrecv.h>
 #include <IRsend.h>
 
-const char* MY_SSID = "icute3";
-const char* MY_PWD =  "thinkbeyond03";
+//const char* MY_SSID = "icute3";
+//const char* MY_PWD =  "thinkbeyond03";
 
 //String tv_On = "",tv_volUp = "",tv_volDown = "";
 //int buffOn,buffVolUp,buffVolDown; //buffer botton decoder
 
-//const char* MY_SSID = "26SW_WIFI_2.4G";
-//const char* MY_PWD =  "58543206";
+const char* MY_SSID = "26SW_AIS2.4G";
+const char* MY_PWD =  "58543206";
 
 const uint16_t kRecvPin = D5;
 const uint32_t kBaudRate = 115200;
@@ -68,13 +68,33 @@ String httpJSON(String Data,String rawData){
       JsonObject& JSONencoder = JSONbuffer.createObject(); 
 
       
+<<<<<<< HEAD
+      JSONencoder["column"] = Data;    //ชื่อคอลัม
+      JSONencoder["value"] = rawData;  //ข้อมูลที่ส่งไป
+=======
       JSONencoder[Data] = rawData;    //input String to Json 
+>>>>>>> e5b3d3a545e8635ef7ba0a5f5c2dab7c494f736d
       //JSONencoder["Button"] = "TV_ON"; 
       
       char JSONmessageBuffer[3000];
       JSONencoder.prettyPrintTo(JSONmessageBuffer, sizeof(JSONmessageBuffer));
       Serial.println(JSONmessageBuffer);
       HTTPClient http;
+<<<<<<< HEAD
+      http.begin("http://192.168.1.100:4000/control/api/json");      //ปลายทางที่เราจะส่ง JSONไป
+      http.addHeader("Content-Type", "application/json");  //Specify content-type header
+
+//      int httpCode = http.POST(JSONmessageBuffer);   //Send the request
+//      if(httpCode > 0 ){
+//         String payload = http.getString();                                        //Get the response payload
+//        Serial.print("httpCode :");
+//        Serial.println(payload);    //Print request response payload
+//        
+//      }
+//       Serial.println(httpCode);   //Print HTTP return code
+        http.POST(JSONmessageBuffer);
+//      http.getString(); 
+=======
       http.begin("http://192.168.1.24:4000/control/api/json");      //ปลายทางที่เราจะส่ง JSONไป
       http.addHeader("Content-Type", "application/json");  //Specify content-type header
 
@@ -85,14 +105,19 @@ String httpJSON(String Data,String rawData){
 //      Serial.println(payload);    //Print request response payload
       http.POST(JSONmessageBuffer);
       http.getString(); 
+>>>>>>> e5b3d3a545e8635ef7ba0a5f5c2dab7c494f736d
       http.end();  //Close connection
       
     }else {
       Serial.println("Error in WiFi connection"); 
+<<<<<<< HEAD
+    }   
+=======
     }
 
 
     
+>>>>>>> e5b3d3a545e8635ef7ba0a5f5c2dab7c494f736d
 }
 
 
@@ -115,12 +140,22 @@ void setup() {
       delay(500);
       Serial.print(".");
   }
+<<<<<<< HEAD
+  Serial.print("WIFI connected! , to IP address: ");
+  Serial.println(WiFi.localIP());
+  Serial.println("");
+
+  
+    Serial.println("--------- DECOD TV REMOTE-------------");
+
+=======
   Serial.println("wl connected");
   Serial.println("");
   Serial.println("WIFI connected\n ");
   Serial.println("");
     Serial.println("--------- DECOD TV REMOTE-------------");
     
+>>>>>>> e5b3d3a545e8635ef7ba0a5f5c2dab7c494f736d
     Serial.println("Enter ' 0 ' ON Button ");
     Serial.println("Enter ' 5 ' OK Button");
     Serial.println("Enter ' 8 ' ▲ Button");
@@ -133,12 +168,23 @@ void setup() {
     Serial.println("Enter ' 3 ' CH ▼ Button");
     Serial.println("Enter ' 1 ' ↺Return,Exit Button");
     Serial.println("Enter ' 7 ' Mute Button");  
+<<<<<<< HEAD
+//    irsend.begin();  //เปิดpin ในการส่ง IR
+}
+
+
+
+
+void loop() {
+    char input;
+=======
 //    irsend.begin();
 }
 
 char input;
 
 void loop() {
+>>>>>>> e5b3d3a545e8635ef7ba0a5f5c2dab7c494f736d
     if(irrecv.decode(&results)) {
       if(Serial.available()){
           input = Serial.read();
@@ -149,24 +195,40 @@ void loop() {
             Serial.println("You Select TV remote & Decoder ON Button ");  
             int buffOn = uint64ToString(getCorrectedRawLength(&results), 10).toInt();
             String tv_On = resultToSourceCode(&results);// Feed the WDT as the text output can take a while to print.
+<<<<<<< HEAD
+             // uint16_t command[bufferSize];
+            Serial.print("tv_On[");Serial.print(buffOn);Serial.print("] :");Serial.println(tv_On);
+            Serial.println("Decoder Success!!"); Serial.println(""); 
+//          Serial.println("tv_On :");Serial.println(tv_On);
+            httpJSON("tv_On",tv_On);
+
+=======
            yield(); 
             // uint16_t command[bufferSize];
             Serial.print("tv_On[");Serial.print(buffOn);Serial.print("] :");Serial.println(tv_On);
             // yield(); 
             Serial.println("Decoder Success!!"); Serial.println("");  
             httpJSON("tv_On",tv_On);
+>>>>>>> e5b3d3a545e8635ef7ba0a5f5c2dab7c494f736d
           }
  /*----------------------------------Decode Tv remote  ' + ' Vol+ Button -----------------------------------------*/             
           else if( input == '+'){   
             Serial.println("You Select TV remote & Decoder Vol+ Button");
             int buffVolUp = uint64ToString(getCorrectedRawLength(&results), 10).toInt();
             String tv_volUp = resultToSourceCode(&results);// Feed the WDT as the text output can take a while to print.
+<<<<<<< HEAD
+            // uint16_t command[bufferSize];
+            Serial.print("tv_volUp[");Serial.print(buffVolUp);Serial.print("] :");Serial.println(tv_volUp);
+            Serial.println("Decoder Success!!"); Serial.println("");
+            httpJSON("tv_volUp",tv_volUp);    
+=======
            yield(); 
             // uint16_t command[bufferSize];
             Serial.print("tv_volUp[");Serial.print(buffVolUp);Serial.print("] :");Serial.println(tv_volUp);
             // yield(); 
             Serial.println("Decoder Success!!"); Serial.println("");
             httpJSON("tv_volUp",tv_volUp);      
+>>>>>>> e5b3d3a545e8635ef7ba0a5f5c2dab7c494f736d
           } 
   /*----------------------------------Decode Tv remote  ' - ' vol- Button-----------------------------------------*/     
            else if( input == '-'){   
@@ -175,9 +237,14 @@ void loop() {
             String tv_volDown = resultToSourceCode(&results);// Feed the WDT as the text output can take a while to print.
             // uint16_t command[bufferSize];
             Serial.print("tv_volDown[");Serial.print(buffVolDown);Serial.print("] :");Serial.println(tv_volDown);
+<<<<<<< HEAD
+            Serial.println("Decoder Success!!"); Serial.println("");
+            httpJSON("tv_volDown",tv_volDown);
+=======
             // yield(); 
             Serial.println("Decoder Success!!"); Serial.println("");
             httpJSON("tv_volDown",tv_volDown);     
+>>>>>>> e5b3d3a545e8635ef7ba0a5f5c2dab7c494f736d
           }  
 /*----------------------------------Decode Tv remote  ' 5 ' OK Button -----------------------------------------*/ 
            else if( input == '5'){   
@@ -186,9 +253,14 @@ void loop() {
             String tv_OK = resultToSourceCode(&results);// Feed the WDT as the text output can take a while to print.
             // uint16_t command[bufferSize];
             Serial.print("tv_OK[");Serial.print(buffOK);Serial.print("] :");Serial.println(tv_OK);
+<<<<<<< HEAD
+            Serial.println("Decoder Success!!"); Serial.println("");
+            httpJSON("tv_OK",tv_OK);
+=======
             // yield(); 
             Serial.println("Decoder Success!!"); Serial.println("");
             httpJSON("tv_OK",tv_OK);     
+>>>>>>> e5b3d3a545e8635ef7ba0a5f5c2dab7c494f736d
           }  
 /*----------------------------------Decode Tv remote  ' 8 ' ▲ Button-----------------------------------------*/
            else if( input == '8'){   
@@ -197,9 +269,14 @@ void loop() {
             String tv_Up = resultToSourceCode(&results);// Feed the WDT as the text output can take a while to print.
             // uint16_t command[bufferSize];
             Serial.print("tv_Up[");Serial.print(buffUp);Serial.print("] :");Serial.println(tv_Up);
+<<<<<<< HEAD
+            Serial.println("Decoder Success!!"); Serial.println("");
+            httpJSON("tv_Up",tv_Up);
+=======
             // yield(); 
             Serial.println("Decoder Success!!"); Serial.println("");
             httpJSON("tv_Up",tv_Up);     
+>>>>>>> e5b3d3a545e8635ef7ba0a5f5c2dab7c494f736d
           }    
 /*----------------------------------Decode Tv remote  ' 4 ' ◀ Button-----------------------------------------*/
            else if( input == '4'){   
@@ -208,9 +285,14 @@ void loop() {
             String tv_Left = resultToSourceCode(&results);// Feed the WDT as the text output can take a while to print.
             // uint16_t command[bufferSize];
             Serial.print("tv_Left[");Serial.print(buffLeft);Serial.print("] :");Serial.println(tv_Left);
+<<<<<<< HEAD
+            Serial.println("Decoder Success!!"); Serial.println("");
+            httpJSON("tv_Left",tv_Left);    
+=======
             // yield(); 
             Serial.println("Decoder Success!!"); Serial.println("");
             httpJSON("tv_Left",tv_Left);     
+>>>>>>> e5b3d3a545e8635ef7ba0a5f5c2dab7c494f736d
           } 
 /*----------------------------------Decode Tv remote  ' 6 ' ▶ Button-----------------------------------------*/ 
            else if( input == '6'){   
@@ -219,9 +301,14 @@ void loop() {
             String tv_Right = resultToSourceCode(&results);// Feed the WDT as the text output can take a while to print.
             // uint16_t command[bufferSize];
             Serial.print("tv_Right[");Serial.print(buffRight);Serial.print("] :");Serial.println(tv_Right);
+<<<<<<< HEAD
+            Serial.println("Decoder Success!!"); Serial.println("");
+            httpJSON("tv_Right",tv_Right); 
+=======
             // yield(); 
             Serial.println("Decoder Success!!"); Serial.println("");
             httpJSON("tv_Right",tv_Right);     
+>>>>>>> e5b3d3a545e8635ef7ba0a5f5c2dab7c494f736d
           }
 /*----------------------------------Decode Tv remote  ' 2 ' ▼ Button-----------------------------------------*/ 
            else if( input == '2'){   
@@ -230,9 +317,14 @@ void loop() {
             String tv_Down = resultToSourceCode(&results);// Feed the WDT as the text output can take a while to print.
             // uint16_t command[bufferSize];
             Serial.print("tv_Down[");Serial.print(buffDown);Serial.print("] :");Serial.println(tv_Down);
+<<<<<<< HEAD
+            Serial.println("Decoder Success!!"); Serial.println("");
+            httpJSON("tv_Down",tv_Down);  
+=======
             // yield(); 
             Serial.println("Decoder Success!!"); Serial.println("");
             httpJSON("tv_Down",tv_Down);     
+>>>>>>> e5b3d3a545e8635ef7ba0a5f5c2dab7c494f736d
           }
 /*----------------------------------Decode Tv remote  ' 9 ' CH ▲ Button-----------------------------------------*/
            else if( input == '9'){   
@@ -241,9 +333,14 @@ void loop() {
             String tv_CHUp = resultToSourceCode(&results);// Feed the WDT as the text output can take a while to print.
             // uint16_t command[bufferSize];
             Serial.print("tv_CHUp[");Serial.print(buffCHUp);Serial.print("] :");Serial.println(tv_CHUp);
+<<<<<<< HEAD
+            Serial.println("Decoder Success!!"); Serial.println("");
+            httpJSON("tv_CHUp",tv_CHUp);
+=======
             // yield(); 
             Serial.println("Decoder Success!!"); Serial.println("");
             httpJSON("tv_CHUp",tv_CHUp);     
+>>>>>>> e5b3d3a545e8635ef7ba0a5f5c2dab7c494f736d
           }
 /*----------------------------------Decode Tv remote  ' 3 ' CH ▼ Button-----------------------------------------*/ 
            else if( input == '3'){   
@@ -252,9 +349,14 @@ void loop() {
             String tv_CHDown = resultToSourceCode(&results);// Feed the WDT as the text output can take a while to print.
             // uint16_t command[bufferSize];
             Serial.print("tv_CHDown[");Serial.print(buffCHDown);Serial.print("] :");Serial.println(tv_CHDown);
+<<<<<<< HEAD
+            Serial.println("Decoder Success!!"); Serial.println("");
+            httpJSON("tv_CHDown",tv_CHDown); 
+=======
             // yield(); 
             Serial.println("Decoder Success!!"); Serial.println("");
             httpJSON("tv_CHDown",tv_CHDown);     
+>>>>>>> e5b3d3a545e8635ef7ba0a5f5c2dab7c494f736d
           }
 /*----------------------------------Decode Tv remote  ' 1 ' ↺Return,Exit Button-----------------------------------------*/ 
            else if( input == '1'){   
@@ -263,9 +365,14 @@ void loop() {
             String tv_Return = resultToSourceCode(&results);// Feed the WDT as the text output can take a while to print.
             // uint16_t command[bufferSize];
             Serial.print("tv_Return[");Serial.print(buffReturn);Serial.print("] :");Serial.println(tv_Return);
+<<<<<<< HEAD
+            Serial.println("Decoder Success!!"); Serial.println("");
+            httpJSON("tv_Return",tv_Return);
+=======
             // yield(); 
             Serial.println("Decoder Success!!"); Serial.println("");
             httpJSON("tv_Return",tv_Return);     
+>>>>>>> e5b3d3a545e8635ef7ba0a5f5c2dab7c494f736d
           }
 /*----------------------------------Decode Tv remote  ' 7 ' Mute Button-----------------------------------------*/  
             else if( input == '7'){   
@@ -274,12 +381,19 @@ void loop() {
             String tv_Mute = resultToSourceCode(&results);// Feed the WDT as the text output can take a while to print.
             // uint16_t command[bufferSize];
             Serial.print("tv_Mute[");Serial.print(buffMute);Serial.print("] :");Serial.println(tv_Mute);
+<<<<<<< HEAD
+            Serial.println("Decoder Success!!"); Serial.println("");
+            httpJSON("tv_Mute",tv_Mute);    
+          }Serial.println("Next Button Encoder "); 
+          //int timeout = millis(); 
+=======
             // yield(); 
             Serial.println("Decoder Success!!"); Serial.println("");
             httpJSON("tv_Mute",tv_Mute);     
           }
           //int timeout = millis();
           Serial.println("Next Button Encoder ");  
+>>>>>>> e5b3d3a545e8635ef7ba0a5f5c2dab7c494f736d
       }
    }    
 }
