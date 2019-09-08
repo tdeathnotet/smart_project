@@ -3,9 +3,32 @@ var sql = require('../db');
 import pool from '../db' 
 
 const controlModel = {
-    getName(name){
+    // getName(name){
+    //     return new Promise((resolve,reject) => {
+    //         pool.query('SELECT * FROM `devices` WHERE `device_id` = ?',[name],
+    //         function (error, results, fields) {
+    //             if (error) throw error;
+    //                 console.log(results)
+    //                 return resolve(results)
+    //         }
+    //         )
+    //     }) //callback function
+    // },
+    addTV_remote({column, value}){
+        console.log({column,value})
+        return new Promise((resolve , reject) => {
+            //const tem = { air_power: 'Winnie', air_tempUp: 'Australia' };
+            pool.query('UPDATE `tv_remote` SET '+column+' = ?' ,[value], 
+            function(err,result,fields){
+                if(err) throw err;
+                console.log("UPDATE ")
+                return resolve(result)
+            })
+        })
+    },
+    getTV_remote(column){
         return new Promise((resolve,reject) => {
-            pool.query('SELECT * FROM `devices` WHERE `device_id` = ?',[name],
+            pool.query('SELECT '+column+' FROM `tv_remote`',
             function (error, results, fields) {
                 if (error) throw error;
                     console.log(results)
@@ -13,39 +36,6 @@ const controlModel = {
             }
             )
         }) //callback function
-    },
-    createUser(users){
-        
-        return new Promise ((resolve , reject) =>{
-            pool.query('INSERT INTO `devices`(`device_name`, `device_room`, `wifi_user`, `wifi_pass`) VALUES ? ',[users],
-            function(error,results,fields){
-                if(error) throw error;
-                console.log(results)
-                return resolve(results)
-            })
-        })
-    },
-    insertTest(temp){
-        return new Promise((resolve , reject) => {
-            //const tem = { air_power: 'Winnie', air_tempUp: 'Australia' };
-            pool.query('INSERT INTO `remote_air`(air_power,air_tempUp) VALUES (?,?)',[temp,temp], 
-            function(err,result,fields){
-                if(err) throw err;
-                console.log("1 record ")
-                return resolve(result)
-            })
-        })
-    },
-    addTV_remote({tv_On}){
-        return new Promise((resolve , reject) => {
-            //const tem = { air_power: 'Winnie', air_tempUp: 'Australia' };
-            pool.query('INSERT INTO `tv_remote` (On) VALUES (?)',[tv_On], 
-            function(err,result,fields){
-                if(err) throw err;
-                console.log("1 record ")
-                return resolve(result)
-            })
-        })
     }
 }
 
