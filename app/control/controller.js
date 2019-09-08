@@ -2,30 +2,17 @@ import {controlModel} from './index'
 
 
 const controller = {
-
-    showTemp(req,res){
+    addTVRemote(req,res){  // add TV remote
       //console.log(req)
-      const t = req.query.temp
-      console.log(t)
-      //res.send('success : ' + t)
-      controlModel.insertTest(t)
-      //controlModel.showTemp(t).then(data)
-      // const t = req.body.temp
-      // console.log(t)
-      // res.send(req.body)
+      //console.log(req.body)
+      controlModel.addTV_remote(req.body)  //ส่งข้อมูลไปเก็บยัง mySQL
     },
-    showJson(req,res){
-      //console.log(req)
-      console.log(req.body)
-      //controlModel.addTV_remote(req.body)  //ส่งข้อมูลไปเก็บยัง mySQL
-    },
-    getName(req,res){
-      const reqID = req.params.id //รับค่าจาก url เป็น params
+    getTVRemote(req,res){
+      const reqButton = req.params.button //รับค่าจาก url เป็น params
       //const reqID = req.name
-      console.log(reqID)
-      controlModel.getName(reqID).then((data) => {  //ส่งข้อมูลจาก getName(temp) กลับมาแสดงจาก Database
-        res.status(200).json({ "device_name": data }) 
-      //res.status(200).json({ "device_name": "Suchada", "device_room": "Bedroom" })
+      console.log(reqButton)
+      controlModel.getTV_remote(reqButton).then((rawData) => {    //ส่งข้อมูลจาก getName(temp) กลับมาแสดงจาก Database
+        res.status(200).json(rawData) //res.status(200).json({ "device_name": "Suchada", "device_room": "Bedroom" })
       })     
     }
 }
