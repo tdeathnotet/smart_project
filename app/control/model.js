@@ -3,17 +3,6 @@ var sql = require('../db');
 import pool from '../db' 
 
 const controlModel = {
-    // getName(name){
-    //     return new Promise((resolve,reject) => {
-    //         pool.query('SELECT * FROM `devices` WHERE `device_id` = ?',[name],
-    //         function (error, results, fields) {
-    //             if (error) throw error;
-    //                 console.log(results)
-    //                 return resolve(results)
-    //         }
-    //         )
-    //     }) //callback function
-    // },
     addTV_remote({column, value}){
         console.log({column,value})
         return new Promise((resolve , reject) => {
@@ -31,7 +20,7 @@ const controlModel = {
             pool.query('SELECT '+column+' FROM `tv_remote`',
             function (error, results, fields) {
                 if (error) throw error;
-                    console.log(results)
+                    // console.log(results)
                     return resolve(results)
             }
             )

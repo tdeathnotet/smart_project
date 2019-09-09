@@ -1,6 +1,5 @@
 import {controlModel} from './index' 
 
-
 const controller = {
     addTVRemote(req,res){  // add TV remote
       //console.log(req)
@@ -12,9 +11,9 @@ const controller = {
       //const reqID = req.name
       console.log(reqButton)
       controlModel.getTV_remote(reqButton).then((rawData) => {    //ส่งข้อมูลจาก getName(temp) กลับมาแสดงจาก Database
-        res.status(200).json(rawData) //res.status(200).json({ "device_name": "Suchada", "device_room": "Bedroom" })
-      })     
+        res.status(200).send(rawData) //res.status(200).json({ "device_name": "Suchada", "device_room": "Bedroom" })
+        //console.log(rawData)
+      })    
     }
 }
 export default controller 
-
