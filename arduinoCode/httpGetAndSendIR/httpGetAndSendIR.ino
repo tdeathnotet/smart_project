@@ -32,6 +32,7 @@ const uint8_t kTimeout = 15;
 #endif  // DECODE_AC
 const uint16_t kMinUnknownSize = 12;
 
+int check = 0;
 
 
 IRrecv irrecv(kRecvPin, kCaptureBufferSize, kTimeout, true);
@@ -69,13 +70,11 @@ void httpJSON(String Data,String rawData){
 
 
 void httpGetAndSendIR(String Data,int buffSize){
-  if (WiFi.status() == WL_CONNECTED) {
     HTTPClient http;  //Object of class HTTPClient
     String url = ("http://192.168.1.100:4000/control/tv/" + Data) ; // คอลัม
 //    Serial.print("url  ");Serial.println(url);
     http.begin(url);
-    int httpCode = http.GET();
-                                                                
+    int httpCode = http.GET();                                                       
     if(httpCode > 0){   //Check the returning code    
     const size_t bufferSize = JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(1) + 3000;
     DynamicJsonBuffer jsonBuffer(bufferSize);
@@ -89,16 +88,40 @@ void httpGetAndSendIR(String Data,int buffSize){
  //------------------ฟังก์ชั้น แปลงค่าString เป็น int  --------------------------------------------------------------------------------------------------
      uint16_t command[buffSize];
      toIntArray(jsonCommand,buffSize,command);   
-     irsend.sendRaw(command,buffSize, 38); //IR SEND
-     
+     irsend.sendRaw(command,buffSize, 38); //IR SEND 
     }
      http.end();   //Close connection
-
-  }
 }
 
-
-
+void httpGet(){
+    
+    HTTPClient http;  //Object of class HTTPClient
+//    String url = ("http://192.168.1.100:4000/control/tv/") ; // คอลัม
+//    Serial.print("url  ");Serial.println(url);
+    http.begin("http://192.168.1.100:4000/control/remote_tv/tv_On");
+    int httpCode = http.GET();                                                       
+    if(httpCode > 0){   //Check the returning code    
+     //Serial.print("jsonCommand: ");Serial.println(http.getString());
+//     String On = http.getString();
+//     Serial.println("jsonCommand: " + On);
+  
+      StaticJsonBuffer<200> jsonBuffer;
+      JsonObject& root = jsonBuffer.parseObject(http.getString());
+      String On = root["Tv_On"];   //Check JSON
+      Serial.println("jsonCommand: " + On);
+      if (On == "On" || On == "Off" ){
+        if(On == "On" && check == 0){
+          httpGetAndSendIR("tv_On",71);
+          check = 1;
+        }
+        if(On == "Off" && check == 1){
+          httpGetAndSendIR("tv_On",71);
+          check = 0;
+        }
+      }
+   }
+     http.end();   //Close connection
+}
 
 void toIntArray(String str,int buffSize ,uint16_t* command){
     int str_len = str.length()+1;
@@ -124,10 +147,6 @@ void toIntArray(String str,int buffSize ,uint16_t* command){
 
 
 
-
-
-
-
 void setup() {
 //______________________________Basic Setting__________________________________________    
   Serial.begin(115200);
@@ -143,31 +162,31 @@ void setup() {
 
 
 //_____________________________Ceonnect Wifi____________________________________________
-    WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP
-    WiFiManager wm;
-    wm.resetSettings();
-    bool res;
-    // res = wm.autoConnect(); // auto generated AP name from chipid
-    res = wm.autoConnect("SMART_HOME"); // เชื่อมต่อ wifi เพื่อนเข้าไป ตั้งค่าการเชื่อต่อ wifi
-    if(!res) {
-        Serial.println("Failed to connect");
-        // ESP.restart();
-    } 
-    else {
-        //if you get here you have connected to the WiFi    
-        Serial.println("connected...yeey :)");
-    }
+//    WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP
+//    WiFiManager wm;
+//    wm.resetSettings();
+//    bool res;
+//    // res = wm.autoConnect(); // auto generated AP name from chipid
+//    res = wm.autoConnect("SMART_HOME"); // เชื่อมต่อ wifi เพื่อนเข้าไป ตั้งค่าการเชื่อต่อ wifi
+//    if(!res) {
+//        Serial.println("Failed to connect");
+//        // ESP.restart();
+//    } 
+//    else {
+//        //if you get here you have connected to the WiFi    
+//        Serial.println("connected...yeey :)");
+//    }
 
-//  Serial.print("Connecting to "+*MY_SSID);
-//  WiFi.begin(MY_SSID, MY_PWD);
-//
-//  while (WiFi.status() != WL_CONNECTED){
-//      delay(500);
-//      Serial.print(".");
-//  }
-//  Serial.print("WIFI connected! , to IP address: ");
-//  Serial.println(WiFi.localIP());
-//  Serial.println("");
+  Serial.print("Connecting to "+*MY_SSID);
+  WiFi.begin(MY_SSID, MY_PWD);
+
+  while (WiFi.status() != WL_CONNECTED){
+      delay(500);
+      Serial.print(".");
+  }
+  Serial.print("WIFI connected! , to IP address: ");
+  Serial.println(WiFi.localIP());
+  Serial.println("");
 
   
     Serial.println("--------- DECOD TV REMOTE-------------");
@@ -187,11 +206,13 @@ void setup() {
 }
 
 void loop(){
-  while(Serial.available()){
-     char input = Serial.read();
-     if (input == '0'){
-      httpGetAndSendIR("tv_On",71);
-      delay(50);
-     }
-  }
+  httpGet();
+  delay(1000);
+//  while(Serial.available()){
+//     char input = Serial.read();
+//     if (input == '0'){
+//      httpGetAndSendIR("tv_On",71);
+//      delay(50);
+//     }
+//  }
 }
