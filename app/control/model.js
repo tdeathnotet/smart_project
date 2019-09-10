@@ -39,9 +39,9 @@ const controlModel = {
             })
         })
     },
-    getTV_remote(column){
+    getTV_remote(column,column2){
         return new Promise((resolve,reject) => {
-            pool.query('SELECT '+column+'  FROM `tv_remote`',
+            pool.query('SELECT '+column+','+column2+'  FROM `tv_remote`',
             function (error, results, fields) {
                 if (error) throw error;
                     // console.log(results)

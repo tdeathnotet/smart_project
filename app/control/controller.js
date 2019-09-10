@@ -20,11 +20,7 @@ const controller = {
       //const reqID = req.name
       var buffButton = reqButton+"Buff"
       
-      console.log(reqButton)
-
-      console.log(buffButton)
-
-
+      console.log(reqButton , buffButton)
       controlModel.getTV_remote(reqButton,buffButton).then((rawData) => {    //ส่งข้อมูลจาก getName(temp) กลับมาแสดงจาก Database
         res.status(200).send(rawData) //res.status(200).json({ "device_name": "Suchada", "device_room": "Bedroom" })
         //console.log(rawData)
