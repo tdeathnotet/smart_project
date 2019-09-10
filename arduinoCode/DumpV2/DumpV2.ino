@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <WiFiManager.h> 
+//#include <WiFiManager.h> 
 #include <IRremoteESP8266.h>
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WiFi.h>
@@ -9,11 +9,12 @@
 #include <IRrecv.h>
 #include <IRsend.h>
 
-//const char* MY_SSID = "icute3";
-//const char* MY_PWD =  "thinkbeyond03";
+const char* MY_SSID = "icute3";
+const char* MY_PWD =  "thinkbeyond03";
+const String IP =  "http://192.168.1.9:4000";
 
-const char* MY_SSID = "26SW_AIS2.4G";
-const char* MY_PWD =  "58543206";
+//const char* MY_SSID = "26SW_AIS2.4G";
+//const char* MY_PWD =  "58543206";
 
 const uint16_t kRecvPin = D5;
 const uint32_t kBaudRate = 115200;
@@ -51,7 +52,7 @@ void httpJSON(String Data,String rawData){
       JSONencoder.prettyPrintTo(JSONmessageBuffer, sizeof(JSONmessageBuffer));
       Serial.println(JSONmessageBuffer);
       HTTPClient http;
-      http.begin("http://192.168.1.100:4000/control/api/json");      //ปลายทางที่เราจะส่ง JSONไป
+      http.begin(IP + "/control/api/json");      //ปลายทางที่เราจะส่ง JSONไป
       http.addHeader("Content-Type", "application/json");  //Specify content-type header
 
       int httpCode = http.POST(JSONmessageBuffer);   //Send the request
@@ -71,7 +72,7 @@ void httpJSON(String Data,String rawData){
 void httpGetAndSendIR(String Data,int buffSize){
   if (WiFi.status() == WL_CONNECTED) {
     HTTPClient http;  //Object of class HTTPClient
-    String url = ("http://192.168.1.100:4000/control/tv/" + Data) ; // คอลัม
+    String url = (IP + "/control/tv/" + Data) ; // คอลัม
 //    Serial.print("url  ");Serial.println(url);
     http.begin(url);
     int httpCode = http.GET();
@@ -121,13 +122,6 @@ void toIntArray(String str,int buffSize ,uint16_t* command){
     }
 }
 
-
-
-
-
-
-
-
 void setup() {
 //______________________________Basic Setting__________________________________________    
   Serial.begin(115200);
@@ -140,34 +134,34 @@ void setup() {
     irrecv.setUnknownThreshold(kMinUnknownSize);
   #endif                  // DECODE_HASH
     irrecv.enableIRIn();  // Start the receiver
-
+3
 
 //_____________________________Ceonnect Wifi____________________________________________
-    WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP
-    WiFiManager wm;
-    wm.resetSettings();
-    bool res;
-    // res = wm.autoConnect(); // auto generated AP name from chipid
-    res = wm.autoConnect("SMART_HOME"); // เชื่อมต่อ wifi เพื่อนเข้าไป ตั้งค่าการเชื่อต่อ wifi
-    if(!res) {
-        Serial.println("Failed to connect");
-        // ESP.restart();
-    } 
-    else {
-        //if you get here you have connected to the WiFi    
-        Serial.println("connected...yeey :)");
-    }
+//    WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP
+//    WiFiManager wm;
+//    wm.resetSettings();
+//    bool res;
+//    // res = wm.autoConnect(); // auto generated AP name from chipid
+//    res = wm.autoConnect("SMART_HOME"); // เชื่อมต่อ wifi เพื่อนเข้าไป ตั้งค่าการเชื่อต่อ wifi
+//    if(!res) {
+//        Serial.println("Failed to connect");
+//        // ESP.restart();
+//    } 
+//    else {
+//        //if you get here you have connected to the WiFi    
+//        Serial.println("connected...yeey :)");
+//    }
 
-//  Serial.print("Connecting to "+*MY_SSID);
-//  WiFi.begin(MY_SSID, MY_PWD);
-//
-//  while (WiFi.status() != WL_CONNECTED){
-//      delay(500);
-//      Serial.print(".");
-//  }
-//  Serial.print("WIFI connected! , to IP address: ");
-//  Serial.println(WiFi.localIP());
-//  Serial.println("");
+  Serial.print("Connecting to "+*MY_SSID);
+  WiFi.begin(MY_SSID, MY_PWD);
+
+  while (WiFi.status() != WL_CONNECTED){
+      delay(500);
+      Serial.print(".");
+  }
+  Serial.print("WIFI connected! , to IP address: ");
+  Serial.println(WiFi.localIP());
+  Serial.println("");
 
   
     Serial.println("--------- DECOD TV REMOTE-------------");
@@ -184,6 +178,10 @@ void setup() {
     Serial.println("Enter ' 1 ' ↺Return,Exit Button");
     Serial.println("Enter ' 7 ' Mute Button");  
 //    irsend.begin();  //เปิดpin ในการส่ง IR
+
+//tv_Mute[99] :3460, 1754,  416, 424,  444, 1320,  416, 424,  446, 422,  444, 424,  444, 424,  444, 424,  444, 424,  444, 424,  444, 424,  444, 424,  444, 424,  444, 424,  444, 1320,  418, 424,  444, 424,  444, 424,  444, 424,  444, 424,  444, 424,  444, 424,  444, 424,  446, 424,  444, 1320,  418, 422,  446, 424,  444, 424,  446, 422,  444, 424,  444, 424,  444, 424,  444, 424,  444, 424,  444, 1322,  416, 424,  444, 422,  446, 1318,  418, 1320,  418, 422,  444, 424,  446, 422,  444, 1318,  418, 424,  444, 424,  444, 1320,  418, 1318,  418, 424,  444, 1320,  418
+
+
 }
 
 

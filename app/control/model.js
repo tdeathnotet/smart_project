@@ -10,7 +10,7 @@ const controlModel = {
             pool.query('UPDATE `tv_remote` SET '+column+' = ?' ,[value], 
             function(err,result,fields){
                 if(err) throw err;
-                console.log("UPDATE ")
+                console.log("UPDATE " + column)
                 return resolve(result)
             })
         })
