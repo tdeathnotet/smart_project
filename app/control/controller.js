@@ -4,16 +4,28 @@ var tvButton ="";
 
 const controller = {
     addTVRemote(req,res){  // add TV remote
-      //console.log(req)
       //console.log(req.body)
-      //contolModel.addTV_remote(req.body)  //ส่งข้อมูลไปเก็บยัง mySQL
       controlModel.addTV_remote(req.body)
+    },
+    addACRemote(req,res){  // add AC remote
+      //console.log(req.body)
+      controlModel.addAC_remote(req.body)
+    },
+    addFanRemote(req,res){  // add AC remote
+      //console.log(req.body)
+      controlModel.addFan_remote(req.body)
     },
     getTVRemote(req,res){
       const reqButton = req.params.button //รับค่าจาก url เป็น params
       //const reqID = req.name
+      var buffButton = reqButton+"Buff"
+      
       console.log(reqButton)
-      controlModel.getTV_remote(reqButton).then((rawData) => {    //ส่งข้อมูลจาก getName(temp) กลับมาแสดงจาก Database
+
+      console.log(buffButton)
+
+
+      controlModel.getTV_remote(reqButton,buffButton).then((rawData) => {    //ส่งข้อมูลจาก getName(temp) กลับมาแสดงจาก Database
         res.status(200).send(rawData) //res.status(200).json({ "device_name": "Suchada", "device_room": "Bedroom" })
         //console.log(rawData)
       })
