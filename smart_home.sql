@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Sep 10, 2019 at 11:11 AM
+-- Generation Time: Sep 10, 2019 at 03:10 PM
 -- Server version: 8.0.17
 -- PHP Version: 7.3.8
 
@@ -31,20 +31,15 @@ SET time_zone = "+00:00";
 CREATE TABLE `air_remote` (
   `air_id` int(11) NOT NULL,
   `device_id` int(11) NOT NULL,
-  `air_speedDown` text CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `air_powerBuff` int(11) NOT NULL,
   `air_power` text NOT NULL,
+  `air_tempUpBuff` int(11) NOT NULL,
   `air_tempUp` text CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `air_tempDownBuff` int(11) NOT NULL,
   `air_tempDown` text CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `air_speedUp` text CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `air_timer` text NOT NULL
+  `air_speedFanBuff` int(11) NOT NULL,
+  `air_speedFan` text CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `air_remote`
---
-
-INSERT INTO `air_remote` (`air_id`, `device_id`, `air_speedDown`, `air_power`, `air_tempUp`, `air_tempDown`, `air_speedUp`, `air_timer`) VALUES
-(0, 0, '', '554, 17962,  2990, 8954,  514, 478,  516, 1496,  492, 504,  492, 502,  490, 502,  466, 528,  464, 530,  464, 530,  490, 504,  492, 1524,  494, 476,  518, 476,  518, 1498,  492, 476,  520, 476,  516, 1496,  494, 1496,  494, 1524,  466, 1522,  440, 1550,  438, 530,  488, 506,  490, 506,  516, 478,  518, 476,  520, 476,  520, 474,  520, 476,  518, 476,  520, 476,  518, 478,  518, 478,  516, 480,  514, 502,  492, 502,  492, 502,  466, 528,  464, 530,  466, 528,  488, 508,  490, 504,  516, 478,  518, 476,  518, 476,  518, 476,  520, 476,  518, 476,  518, 476,  518, 476,  516, 480,  516, 480,  514, 502,  492, 1524,  440, 1550,  440, 1550,  462, 1526,  494, 2976,  2996, 8950,  520, 1496,  494, 476,  518, 476,  520, 476,  518, 478,  516, 478,  516, 480,  514, 502,  492, 502,  492, 1522,  442, 528,  464, 530,  464, 1552,  462, 506,  492, 502,  518, 1498,  492, 476,  518, 1498,  492, 1496,  494, 1496,  494, 1496,  494, 1522,  466, 1524,  442, 1548,  438, 1550,  464, 504,  516, 478,  518, 476,  520, 1496,  492, 1496,  494, 1496,  492, 478,  516, 480,  516, 480,  514, 502,  492, 502,  492, 1524,  440, 1550,  438, 530,  488, 1528,  490, 1500,  492, 1496,  494, 1496,  492, 1496,  494, 1496,  494, 478,  516, 480,  514, 502,  492, 502,  492, 502,  466, 528,  466, 530,  464, 1550,  464, 1526,  492, 1498,  492, 1496,  494', '', '', '', '');
 
 -- --------------------------------------------------------
 
@@ -78,8 +73,11 @@ INSERT INTO `devices` (`device_id`, `device_name`, `device_room`, `wifi_user`, `
 
 CREATE TABLE `fan_remote` (
   `fan_id` int(11) NOT NULL,
+  `fan_OnBuff` int(11) NOT NULL,
   `fan_On` text NOT NULL,
+  `fan_SpeedBuff` int(11) NOT NULL,
   `fan_Speed` text NOT NULL,
+  `fan_SwingBuff` int(11) NOT NULL,
   `fan_Swing` text NOT NULL,
   `device_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
