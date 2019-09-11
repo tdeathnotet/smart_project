@@ -11,7 +11,7 @@
 
 const char* MY_SSID = "icute3";
 const char* MY_PWD =  "thinkbeyond03";
-const String IP =  "http://192.168.1.9:4000";
+const String IP =  "http://localhost:4000";
 
 //const char* MY_SSID = "26SW_AIS2.4G";
 //const char* MY_PWD =  "58543206";
@@ -68,64 +68,29 @@ void httpJSON(String buttonCode,String rawData,String buttonBuff,int buff){
     }   
 }
 
-
-
-
-void httpGetAndSendIR(String Data,int buffSize){
-  if (WiFi.status() == WL_CONNECTED) {
-    HTTPClient http;  //Object of class HTTPClient
-    String url = (IP + "/control/tv/" + Data) ; // คอลัม
-//    Serial.print("url  ");Serial.println(url);
-    http.begin(url);
-    int httpCode = http.GET();
-                                                                
+void decoder_tvRemote(){
+    http.begin(IP + "/control/remote/decode/tv_button");
+    int httpCode = http.GET();                                             
     if(httpCode > 0){   //Check the returning code    
-    const size_t bufferSize = JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(1) + 3000;
-    DynamicJsonBuffer jsonBuffer(bufferSize);
-    JsonArray& JSONcoder = jsonBuffer.parseArray(http.getString());       // Parsing
-     
-     String jsonCommand = JSONcoder[0][Data]; // Command MySQL
-      //String jsonCommand = JSONcoder["tv_On"]; // Command MySQL
-      //int buffSize = JSONcoder["tv_buffOn"]; //Buffer Button tv_On
-    
-     
-      // Output to serial monitor
-     Serial.print("jsonCommand: ");Serial.println(jsonCommand);
-     
- //------------------ฟังก์ชั้น แปลงค่าString เป็น int  --------------------------------------------------------------------------------------------------
-     uint16_t command[buffSize];
-     toIntArray(jsonCommand,buffSize,command);   
-     //irsend.sendRaw(command,buffSize, 38); //IR SEND
-     
-    }
+     //Serial.print("jsonCommand: ");Serial.println(http.getString());
+//     String On = http.getString();
+//     Serial.println("jsonCommand: " + On);
+  
+      StaticJsonBuffer<200> jsonBuffer;
+      JsonObject& root = jsonBuffer.parseObject(http.getString());
+      String button = root["Button"];   //Check JSON
+      String Status = root["Status"];
+      //Serial.println(http.GET());
+      Serial.println("jsonbutton :" + button);
+      Serial.println("Status :" + Status);
+      
+    jsonBuffer.clear();
+   }
      http.end();   //Close connection
-
-  }
 }
 
 
 
-
-void toIntArray(String str,int buffSize ,uint16_t* command){
-    int str_len = str.length()+1;
-    int arr[buffSize];
-    char toCovrChar[str_len] ;
-    str.toCharArray(toCovrChar,str_len); //เปลี่ยน String เป็น Char
-    char *p = strtok(toCovrChar , ",");
-    size_t index = 0; 
-    while( p != nullptr && index < buffSize){
-      arr[index++] = atoi(p);
-      p = strtok(NULL,",");
-    } 
-    Serial.print("command[");Serial.print(buffSize);Serial.print("] :");
-    command[buffSize]; //กดหมดจำนวนbuffer ให้กับ command
-    for(size_t i = 0; i < index; i++){
-      command[i] = (uint16_t)arr[i]; //ให้array แต่ละตัวของcommand เท่าarr[i]
-      Serial.print(command[i]);
-      if(i < index - 1)
-        Serial.print(", "); //โชว์ data ของ command แต่ละตัว
-    }
-}
 
 void setup() {
 //______________________________Basic Setting__________________________________________    
@@ -142,20 +107,7 @@ void setup() {
 
 
 //_____________________________Ceonnect Wifi____________________________________________
-//    WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP
-//    WiFiManager wm;
-//    wm.resetSettings();
-//    bool res;
-//    // res = wm.autoConnect(); // auto generated AP name from chipid
-//    res = wm.autoConnect("SMART_HOME"); // เชื่อมต่อ wifi เพื่อนเข้าไป ตั้งค่าการเชื่อต่อ wifi
-//    if(!res) {
-//        Serial.println("Failed to connect");
-//        // ESP.restart();
-//    } 
-//    else {
-//        //if you get here you have connected to the WiFi    
-//        Serial.println("connected...yeey :)");
-//    }
+
 
   Serial.print("Connecting to " + *MY_SSID);
   WiFi.begin(MY_SSID, MY_PWD);
@@ -321,5 +273,7 @@ void loop() {
           }
           Serial.println("Next Button Encoder "); 
       }
-   }    
+   } 
+
+      Serial.println("Next.... "); 
 }

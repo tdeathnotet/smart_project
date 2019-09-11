@@ -49,6 +49,28 @@ const controlModel = {
             }
             )
         }) //callback function
+    },
+    getAC_remote(column,column2){
+        return new Promise((resolve,reject) => {
+            pool.query('SELECT '+column+','+column2+'  FROM `air_remote`',
+            function (error, results, fields) {
+                if (error) throw error;
+                    // console.log(results)
+                    return resolve(results)
+            }
+            )
+        }) //callback function
+    },
+    getFan_remote(column,column2){
+        return new Promise((resolve,reject) => {
+            pool.query('SELECT '+column+','+column2+'  FROM `fan_remote`',
+            function (error, results, fields) {
+                if (error) throw error;
+                    // console.log(results)
+                    return resolve(results)
+            }
+            )
+        }) //callback function
     }
 }
 

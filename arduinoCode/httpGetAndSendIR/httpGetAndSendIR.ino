@@ -12,7 +12,7 @@
 
 const char* MY_SSID = "icute3";
 const char* MY_PWD =  "thinkbeyond03";
-const String IP =  "http://192.168.1.9:4000";  //ip *เครื่อง *Server
+const String IP =  "http://192.168.1.10:4000";  //ip *เครื่อง *Server
 
 //const char* MY_SSID = "26SW_AIS2.4G";
 //const char* MY_PWD =  "58543206";
@@ -71,19 +71,19 @@ void httpJSON(String Data,String rawData){
 
 
 
-void httpGetAndSendIR(String Data,int buffSize){
+void httpGetAndSendIR(String Data){
     HTTPClient http;  //Object of class HTTPClient
     String url = (IP + "/control/tv/" + Data) ; // คอลัม
 //    Serial.print("url  ");Serial.println(url);
     http.begin(url);
     int httpCode = http.GET();                                                       
     if(httpCode > 0){   //Check the returning code    
-    const size_t bufferSize = JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(1) + 3000;
+    const size_t bufferSize = JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(2) + 3000;
     DynamicJsonBuffer jsonBuffer(bufferSize);
     JsonArray& JSONcoder = jsonBuffer.parseArray(http.getString());       // Parsing
      
      String jsonCommand = JSONcoder[0][Data]; // Command MySQL
-      //String jsonCommand = JSONcoder["tv_On"]; // Command MySQL
+     int buffSize = JSONcoder[0][Data+"Buff"]; // Command MySQL
       // Output to serial monitor
      Serial.print("jsonCommand: ");Serial.println(jsonCommand);
      
@@ -98,7 +98,7 @@ void httpGetAndSendIR(String Data,int buffSize){
 void httpGet(){
     HTTPClient http;  //Object of class HTTPClient
     http.begin(IP + "/control/remote_tv/button");
-    int httpCode = http.GET();                                                       
+    int httpCode = http.GET();                                             
     if(httpCode > 0){   //Check the returning code    
      //Serial.print("jsonCommand: ");Serial.println(http.getString());
 //     String On = http.getString();
@@ -112,40 +112,40 @@ void httpGet(){
       Serial.println("jsonCommand: " + button);
       
         if(button == "tv_On" ){
-          httpGetAndSendIR(button,99);
+          httpGetAndSendIR(button);
         }
         else if(button == "tv_Up" ){
-          httpGetAndSendIR(button,99);
+          httpGetAndSendIR(button);
         }
         else if(button == "tv_Down" ){
-          httpGetAndSendIR(button,99);
+          httpGetAndSendIR(button);
         }
         else if(button == "tv_Left" ){
-          httpGetAndSendIR(button,99);
+          httpGetAndSendIR(button);
         }
         else if(button == "tv_Right" ){
-          httpGetAndSendIR(button,99);
+          httpGetAndSendIR(button);
         }
         else if(button == "tv_OK" ){
-          httpGetAndSendIR(button,99);
+          httpGetAndSendIR(button);
         }
         else if(button == "tv_volUp" ){
-          httpGetAndSendIR(button,99);
+          httpGetAndSendIR(button);
         }
         else if(button == "tv_VolDown" ){
-          httpGetAndSendIR(button,99);
+          httpGetAndSendIR(button);
         }
         else if(button == "tv_CHUp" ){
-          httpGetAndSendIR(button,99);
+          httpGetAndSendIR(button);
         }
         else if(button == "tv_CHDown" ){
-          httpGetAndSendIR(button,99);
+          httpGetAndSendIR(button);
         }
         else if(button == "tv_Return" ){
-          httpGetAndSendIR(button,99);
+          httpGetAndSendIR(button);
         }
         else if(button == "tv_Mute" ){
-          httpGetAndSendIR(button,99);
+          httpGetAndSendIR(button);
         }  
     jsonBuffer.clear();
    }
@@ -191,7 +191,6 @@ void setup() {
     irrecv.setUnknownThreshold(kMinUnknownSize);
   #endif                  // DECODE_HASH
     irrecv.enableIRIn();  // Start the receiver
-
 
 //_____________________________Ceonnect Wifi____________________________________________
 //    WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP
@@ -239,6 +238,6 @@ void setup() {
 
 void loop(){
     httpGet();
-    delay(100);
+    //delay(100);
     //Serial.println("Whatter Fick");
 }
