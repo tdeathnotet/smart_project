@@ -13,7 +13,8 @@ export function setup(router){
 
     //________________________DECODE AC REMOTE___________________________
     router.post('/api/remote_ac',controller.addACRemote)
-    
+    router.post('/remote/decode/ac_remote',controller.decodeACRemote)
+    router.get('/remote/decode/ac_button',controller.decodeACbutton)
 
 
 
@@ -22,13 +23,13 @@ export function setup(router){
     
 
     //--------------------------------------------TV---------------------------------
-    router.get('/remote_tv/button',controller.getButtonTV)
+    router.get('/remote_on/button',controller.getButton)
     router.get('/tv/:button',controller.getTVRemote)
     // router.post('/remote_tv/tv_On_post',controller.addTvOnPost)
     //--------------------------------------------FAN--------------------------------
-    router.get('/remote_fan/button',controller.getButtonFan)
+    //router.get('/remote_fan/button',controller.getButtonFan)
     router.get('/fan/:button',controller.getFanRemote)
     //-------------------------------------------AC----------------------------------
-    router.get('/remote_ac/button',controller.getButtonAC)
+    //router.get('/remote_ac/button',controller.getButtonAC)
     router.get('/ac/:button',controller.getACRemote)
 }

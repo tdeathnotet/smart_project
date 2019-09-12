@@ -1,49 +1,71 @@
 import {controlModel} from './index' 
-
-var tvButton 
-var fanButton 
-var airButton 
-
+//_____________ปุ่มรับ input การกดปุ่มต่างๆ _____________________-
+var Button 
+//____________ปุ่ม Decode TV________________________
 var decode_TV 
-var checkStatus
+var checkDecode_TV
+//____________ปุ่ม Decode AC________________________
+var decode_AC
+var checkDecode_AC
 
 const controller = {
     decodeTVRemote(req,res){
-      var decode = req.body.button
+      var button_tv = req.body.button
       
-      checkStatus = req.body.status
-      console.log(req.body.status)
-      console.log(req.body.button)  //โชว์ปุ่มที่ต้องการ Decode
+      checkDecode_TV = req.body.status
+      // console.log(req.body.status)
+      // console.log(req.body.button)  //โชว์ปุ่มที่ต้องการ Decode
 
-      if(decode == "decode_tvOn_Off" ){
+      if(button_tv == "decode_tvOn_Off" ){
         decode_TV = "tv_On"
-      }else if(decode == "decode_tvUp") {
+      }if(button_tv == "decode_tvUp") {
         decode_TV = "tv_Up"
-      }else if(decode == "decode_tvDown") {
+      }if(button_tv == "decode_tvDown") {
         decode_TV = "tv_Down"
-      }else if(decode == "decode_tvLeft") {
+      }if(button_tv == "decode_tvLeft") {
         decode_TV = "tv_Left"
-      }else if(decode == "decode_tvRight") {
+      }if(button_tv == "decode_tvRight") {
         decode_TV = "tv_Right"
-      }else if(decode == "decode_tvOk") {
+      }if(button_tv == "decode_tvOk") {
         decode_TV = "tv_OK"
-      }else if(decode == "decode_tvVol_up") {
-        decode_TV = "tv_volUp"
-      }else if(decode == "decode_tvVol_down") {
+      }if(button_tv == "decode_tvVol_up") {
+        decode_TV = "tv_VolUp"
+      }if(button_tv == "decode_tvVol_down") {
         decode_TV = "tv_VolDown"
-      }else if(decode == "decode_tvCh_up") {
+      }if(button_tv == "decode_tvCh_up") {
         decode_TV = "tv_CHUp"
-      }else if(decode == "decode_tvCh_down") {
+      }if(button_tv == "decode_tvCh_down") {
         decode_TV = "tv_CHDown"
-      }else if(decode == "decode_tvReturn") {
+      }if(button_tv == "decode_tvReturn") {
         decode_TV = "tv_Return"
-      }else if(decode == "decode_tvMute") {
+      }if(button_tv == "decode_tvMute") {
         decode_TV = "tv_Mute"
-      }else;
+      }
 
     }, 
     decodeTVbutton(req,res){
-      res.status(200).json({ "Button" : decode_TV ,"Status" : checkStatus })
+      res.status(200).json({ "Button" : decode_TV ,"Status" : checkDecode_TV })
+    },
+    decodeACRemote(req,res){
+      var button_ac = req.body.button
+      checkDecode_AC = req.body.status
+      console.log(req.body.status)
+      console.log(req.body.button)  //โชว์ปุ่มที่ต้องการ Decode
+      
+      if(button_ac == "decode_airPower"){
+        decode_AC = "air_power"
+      }if(button_ac == "decode_airTempUp"){
+        decode_AC = "air_tempUp"
+      }if(button_ac == "decode_airTempDown"){
+        decode_AC = "air_tempDown"
+      }if(button_ac == "decode_airFanSpeed"){
+        decode_AC = "air_speedFan"
+      }if(button_ac == "decode_airSwing"){
+        decode_AC = "air_swing"
+      }
+    },
+    decodeACbutton(req,res){
+      res.status(200).json({ "Button" : decode_AC , "Status" : checkDecode_AC })
     },
     ButtonOnPost(req, res){
       var check = req.body.button
@@ -51,69 +73,67 @@ const controller = {
 
   //________________________TV Control____________________________________
       if(check == "tvOn_Off" ){
-        tvButton = "tv_On"
-        setTimeout(function(){ tvButton = "0" }, 100)
-      }else if(check == "tvUp") {
-        tvButton = "tv_Up"
-        setTimeout(function(){ tvButton = "0" }, 100)
-      }else if(check == "tvDown") {
-        tvButton = "tv_Down"
-        setTimeout(function(){ tvButton = "0" }, 100)
-      }else if(check == "tvLeft") {
-        tvButton = "tv_Left"
-        setTimeout(function(){ tvButton = "0" }, 100)
-      }else if(check == "tvRight") {
-        tvButton = "tv_Right"
-        setTimeout(function(){ tvButton = "0" }, 100)
-      }else if(check == "tvOk") {
-        tvButton = "tv_OK"
-        setTimeout(function(){ tvButton = "0" }, 100)
-      }else if(check == "tvVol_up") {
-        tvButton = "tv_volUp"
-        setTimeout(function(){ tvButton = "0" }, 100)
-      }else if(check == "tvVol_down") {
-        tvButton = "tv_VolDown"
-        setTimeout(function(){ tvButton = "0" }, 100)
-      }else if(check == "tvCh_up") {
-        tvButton = "tv_CHUp"
-        setTimeout(function(){ tvButton = "0" }, 100)
-      }else if(check == "tvCh_down") {
-        tvButton = "tv_CHDown"
-        setTimeout(function(){ tvButton = "0" }, 100)
-      }else if(check == "tvReturn") {
-        tvButton = "tv_Return"
-        setTimeout(function(){ tvButton = "0" }, 100)
-      }else if(check == "tvMute") {
-        tvButton = "tv_Mute"
-        setTimeout(function(){ tvButton = "0" }, 100)
+        Button = "tv_On"
+        setTimeout(function(){ Button = "0" }, 100)
+      }if(check == "tvUp") {
+        Button = "tv_Up"
+        setTimeout(function(){ Button = "0" }, 100)
+      }if(check == "tvDown") {
+        Button = "tv_Down"
+        setTimeout(function(){ Button = "0" }, 100)
+      }if(check == "tvLeft") {
+        Button = "tv_Left"
+        setTimeout(function(){ Button = "0" }, 100)
+      }if(check == "tvRight") {
+        Button = "tv_Right"
+        setTimeout(function(){ Button = "0" }, 100)
+      }if(check == "tvOk") {
+        Button = "tv_OK"
+        setTimeout(function(){ Button = "0" }, 100)
+      }if(check == "tvVol_up") {
+        Button = "tv_VolUp"
+        setTimeout(function(){ Button = "0" }, 100)
+      }if(check == "tvVol_down") {
+        Button = "tv_VolDown"
+        setTimeout(function(){ Button = "0" }, 100)
+      }if(check == "tvCh_up") {
+        Button = "tv_CHUp"
+        setTimeout(function(){ Button = "0" }, 100)
+      }if(check == "tvCh_down") {
+        Button = "tv_CHDown"
+        setTimeout(function(){ Button = "0" }, 100)
+      }if(check == "tvReturn") {
+        Button = "tv_Return"
+        setTimeout(function(){ Button = "0" }, 100)
+      }if(check == "tvMute") {
+        Button = "tv_Mute"
+        setTimeout(function(){ Button = "0" }, 100)
   //______________________________FAN Control__________________________________________________
-      }else if(check == "fanOn_Off"){ 
-        fanButton = "fan_On"
-        setTimeout(function(){ fanButton = "0" }, 100)
-      }else if(check == "fanSpeed"){
-        fanButton = "fan_Speed"
-        setTimeout(function(){ fanButton = "0" }, 100)
-      }else if(check == "fanSwing"){
-        fanButton = "fan_Swing"
-        setTimeout(function(){ fanButton = "0" }, 100)
+      }if(check == "fanOn_Off"){ 
+        Button = "fan_On"
+        setTimeout(function(){ Button = "0" }, 100)
+      }if(check == "fanSpeed"){
+        Button = "fan_Speed"
+        setTimeout(function(){ Button = "0" }, 100)
+      }if(check == "fanSwing"){
+        Button = "fan_Swing"
+        setTimeout(function(){ Button = "0" }, 100)
   //_______________________________Air Control_________________________________________________
-      }else if(check == "airPower"){
-        airButton = "air_power"
-        //setTimeout(function(){ fanButton = "0" }, 100)
-      }else if(check == "airFanSpeed"){
-        airButton = "air_speedFan"
-        //setTimeout(function(){ fanButton = "0" }, 100)
-      }else if(check == "airTempUp"){
-        airButton = "air_tempUp"
-        //setTimeout(function(){ fanButton = "0" }, 100)
-      }else if(check == "airTempDown"){
-        airButton = "air_tempDown"
-        //setTimeout(function(){ fanButton = "0" }, 100)
-      }
-      else{
-        tvButton = "0"
-        fanButton = "0"
-        airButton = "0"
+      }if(check == "airPower"){
+        Button = "air_power"
+        setTimeout(function(){ Button = "0" }, 100)
+      }if(check == "airFanSpeed"){
+        Button = "air_speedFan"
+        setTimeout(function(){ Button = "0" }, 100)
+      }if(check == "airTempUp"){
+        Button = "air_tempUp"
+        setTimeout(function(){ Button = "0" }, 100)
+      }if(check == "airTempDown"){
+        Button = "air_tempDown"
+        setTimeout(function(){ Button = "0" }, 100)
+      }if(check == "airSwing"){
+        Button = "air_swing"
+        setTimeout(function(){ Button = "0" }, 100)
       }
     },
     addTVRemote(req,res){  // add TV remote
@@ -158,15 +178,8 @@ const controller = {
         //console.log(rawData)
       })
     },
-    getButtonFan(req,res){
-      res.json({"Button": fanButton })
-
-    },
-    getButtonTV(req,res){
-      res.json({"Button" : tvButton })
-    },
-    getButtonAC(req,res){
-      res.json({"Button" : airButton })
+    getButton(req,res){
+      res.json({"Button" : Button })
     }
           
     
