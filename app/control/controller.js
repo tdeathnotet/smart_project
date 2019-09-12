@@ -178,7 +178,7 @@ const controller = {
         //console.log(rawData)
       })
     },
-    getButton(req,res){
+    getButton(req,res){  // ส่งต่าปุ่มจาก Font End ไปยัง ESP8266
       res.json({"Button" : Button })
     }
           
