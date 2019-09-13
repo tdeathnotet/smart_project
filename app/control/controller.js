@@ -180,7 +180,12 @@ const controller = {
     },
     getButton(req,res){  // ส่งต่าปุ่มจาก Font End ไปยัง ESP8266
       res.json({"Button" : Button })
-    }
+    },
+    apiSmartGarden(req,res){ //__________Smart garden__________
+      console.log(req.body)
+     controlModel.addSensor(req.body)
+    },
+    handler
           
     
 }
