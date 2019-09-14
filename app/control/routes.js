@@ -3,25 +3,20 @@ import controller from './controller'
 
 export function setup(router){
     router.post('/remote/button_on_post',controller.ButtonOnPost) //เก็บค่าปุ่มจาก หน้าบ้าน...
-    
 
     //________________________DECODE TV REMOTE___________________________
     router.post('/api/remote_tv',controller.addTVRemote)
     router.post('/remote/decode/tv_remote',controller.decodeTVRemote)  //หน้าบ้านส่งปุ่มอะไรมา
     router.get('/remote/decode/tv_button',controller.decodeTVbutton)  //ส่งให้ ESP8266
 
-
     //________________________DECODE AC REMOTE___________________________
     router.post('/api/remote_ac',controller.addACRemote)
     router.post('/remote/decode/ac_remote',controller.decodeACRemote)
     router.get('/remote/decode/ac_button',controller.decodeACbutton)
 
-
-
     //________________________DECODE FAN REMOTE__________________________
     router.post('/api/remote_fan',controller.addFanRemote)
     
-
     //--------------------------------------------TV---------------------------------
     router.get('/remote_on/button',controller.getButton)
     router.get('/tv/:button',controller.getTVRemote)
@@ -32,4 +27,8 @@ export function setup(router){
     //-------------------------------------------AC----------------------------------
     //router.get('/remote_ac/button',controller.getButtonAC)
     router.get('/ac/:button',controller.getACRemote)
+
+
+    //_________________________SMART GARDEN_________________________________________
+    router.post('/api/smart_garden',controller.apiSmartGarden)
 }

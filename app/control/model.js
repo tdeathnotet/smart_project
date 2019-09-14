@@ -68,6 +68,17 @@ const controlModel = {
             }
             )
         }) //callback function
+    },
+    addSensor({column,value,column2,value2,column3,value3,column4,value4}){
+        //console.log({column,value,column2,value2,column3,value3,column4,value4})
+        return new Promise((resolve , reject) => {
+            pool.query('UPDATE `smart_garden` SET '+column+' = ? , '+column2+' = ? , '+column3+' = ?, '+column4+' = ?' ,[value,value2,value3,value4], 
+            function(err,result,fields){
+                if(err) throw err;
+                //console.log(".")
+                return resolve(result)
+            })
+        })
     }
 }
 
