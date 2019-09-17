@@ -5,7 +5,7 @@ import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 //import session from 'express-session'
 import cors from 'cors'
-import socketIO from 'socket.io'
+
 
 
 function setupRoutes(app){
@@ -23,9 +23,15 @@ function setupRoutes(app){
     })
 }
 
+
 export function setup(){
     const app = express()
     const PORT = 4000
+
+    //socket.io
+    const server = require('http').createServer(app);
+    const io = require('socket.io').listen(server);
+
 
     //app.use(auth)
     app.use(express.static(__dirname + '/uploads'));
@@ -33,24 +39,7 @@ export function setup(){
     app.use(bodyParser.json()) 
     app.use(cookieParser())
     app.use(cors())
-
     setupRoutes(app)
-
-    const io = socketIO.listen(app);
-// รอการ connect จาก client
-    io.on('connection', client => {
-        console.log('user connected')
-    
-        // เมื่อ Client ตัดการเชื่อมต่อ
-        client.on('disconnect', () => {
-            console.log('user disconnected')
-        })
-
-        // ส่งข้อมูลไปยัง Client ทุกตัวที่เขื่อมต่อแบบ Realtime
-        client.on('sent-message', function (message) {
-            io.sockets.emit('new-message', message)
-        })
-    })
 
     app.listen(PORT, () =>
     console.log('App run port' + PORT)

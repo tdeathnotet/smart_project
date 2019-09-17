@@ -11,9 +11,12 @@ const char* MY_PWD =  "thinkbeyond03";
 //const char* MY_PWD =  "58543206";
 
 
-const String IP =  "http://192.168.1.10:4000";  //ip *เครื่อง *Server
+
+String statusDevice = "";
+const String IP =  "http://192.168.1.13:4000";  //ip *เครื่อง *Server
 HTTPClient http;
 
+#define PIN 16 //Relay pin ( gpio16 , D0 ) for ESP8266
 
 
 //___________________ตั้งค่า Sensor ___________________________________________
@@ -22,6 +25,40 @@ BH1750FVI LightSensor(BH1750FVI::k_DevModeContLowRes);  //ขาเซ็นเ�
 #define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
 DHT dht(DHTPIN, DHTTYPE);
 
+
+void httpGet(){  //รับค่าจาก Saver เป็น http gets
+    
+
+    
+    http.begin(IP + "/control/smartgarden/status");
+    int httpCode = http.GET();                                             
+    if(httpCode > 0){   //Check the returning code    
+      StaticJsonBuffer<200> jsonBuffer;
+      JsonObject& root = jsonBuffer.parseObject(http.getString());
+      String button = root["status"];   //Check JSON
+      //Serial.println(http.GET());
+      
+ //____________________รับปุ่มTV_______________________________________     
+        if(button == "ON" ){
+          Serial.println(" SMART GARDEN : " + button );
+          digitalWrite(PIN,HIGH); // Pin D0 is HIGH
+          statusDevice = button;
+          //command
+        }
+        if(button == "OFF" ){
+          //command
+          Serial.println(" SMART GARDEN : " + button );
+          digitalWrite(PIN,LOW); // Pin D0 is LOW
+          statusDevice = button;
+        }
+
+        
+    sensor();   //อ่านค่าจาก Sensor   
+    send_toSQL();  //ส่งข้อมูลไปเก็บยัง Data
+    jsonBuffer.clear();
+   }
+     http.end();   //Close connection
+}
 
 
 void sensor(){
@@ -60,10 +97,12 @@ void send_toSQL(){
       root["value3"] = dht.readTemperature(true);
       root["column4"] = "sensor_light";
       root["value4"] = LightSensor.GetLightIntensity();
+      root["status"] = statusDevice;  //สถานะการทำงานของ pump
+
       
       char JSONmessageBuffer[500];
       root.prettyPrintTo(JSONmessageBuffer, sizeof(JSONmessageBuffer));
-      Serial.println(JSONmessageBuffer);
+     // Serial.println(JSONmessageBuffer);
 
       http.begin(IP + "/control/api/smart_garden");      //ปลายทางที่เราจะส่ง JSONไป
       http.addHeader("Content-Type", "application/json");  //Specify content-type header
@@ -99,15 +138,19 @@ void setup() {
   Serial.println("");
 
   
+
+  
 //_____________________________เปิดขา Sensor__________________________-
   dht.begin();
   LightSensor.begin();
+  pinMode(PIN,OUTPUT);
+
+
 }
 
+
 void loop() {
-  send_toSQL();
-  sensor();
-  //delay(1000);
-
-
+  httpGet();
+  
+  delay(1000);
 }

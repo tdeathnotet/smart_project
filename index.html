@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title>Sensor Data</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/epoch/0.8.4/css/epoch.min.css">
+
+    <style>
+        .demo-layout-waterfall .mdl-layout__header-row .mdl-navigation__link:last-of-type {
+            padding-right: 0;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="demo-layout-waterfall mdl-layout mdl-js-layout">
+
+        <!-- Header -->
+        <header class="mdl-layout__header mdl-layout__header--waterfall">
+            <!-- Top row, always visible -->
+            <div class="mdl-layout__header-row">
+                <!-- Title -->
+                <span class="mdl-layout-title">Sensor Data</span>
+                <div class="mdl-layout-spacer"></div>
+                <div class="mdl-textfield mdl-js-textfield mdl-textfield--expandable
+                  mdl-textfield--floating-label mdl-textfield--align-right">
+
+                    <div class="mdl-textfield__expandable-holder">
+                        <input class="mdl-textfield__input" type="text" name="sample" id="waterfall-exp">
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="mdl-layout__drawer">
+            <span class="mdl-layout-title">Title</span>
+            <nav class="mdl-navigation">
+                <a class="mdl-navigation__link" href="">Link</a>
+                <a class="mdl-navigation__link" href="">Link</a>
+                <a class="mdl-navigation__link" href="">Link</a>
+                <a class="mdl-navigation__link" href="">Link</a>
+            </nav>
+        </div>
+
+        <main class="mdl-layout__content">
+            <div class="page-content">
+
+                <!-- Sensor Data Table -->
+                <div class="mdl-grid">
+                    <div class="mdl-cell mdl-cell--12-col">
+
+                        <div>
+                            <!--d3 Colors: https://github.com/d3/d3-3.x-api-reference/blob/master/Ordinal-Scales.md-->
+                            <span class="mdl-chip" style="float: right; background-color:#2ca02c; color:#FFF">
+                                <span class="mdl-chip__text">Device 3</span>
+                            </span>
+
+                            <span class="mdl-chip" style="float: right; background-color:#ff7f0e; color:#FFF">
+                                <span class="mdl-chip__text">Device 2</span>
+                            </span>
+
+                            <span class="mdl-chip" style="float: right; background-color:#1f77b4; color:#FFF">
+                                <span class="mdl-chip__text">Device 1</span>
+                            </span>
+
+                            <h3>Humidity</h3>
+                            <div id="chart" class="epoch category10" style="width: 1000px; height: 200px; margin: 0 auto 20px"></div>
+                        </div>
+
+                        <div>
+                            <h3>Sensor Data</h3>
+                            <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp" style="width: 100%">
+                                <thead>
+                                    <tr>
+                                        <th class="mdl-data-table__cell--non-numeric">Time</th>
+                                        <th>Device</th>
+                                        <th>Humidity</th>
+                                        <th>Temp</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+
+        </main>
+
+    </div>
+
+    <!-- JS -->
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.2.1.js"></script>
+    <script src="http://code.getmdl.io/1.3.0/material.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/epoch/0.8.4/js/epoch.min.js"></script>
+    <script>
+        var chart;
+
+        // Change port from default 8000 if adjusted in server-side module args
+        var socket = io('http://localhost:8000');
+
+        // Process message when received from server
+        socket.on('message', function (data) {
+
+            // Echo message to console
+            console.log(data);
+
+            // Write data into new table row
+            const time = new Date();
+            $.each(data.content, function (i, data) {
+                $('table tbody').prepend(`<tr><td class="mdl-data-table__cell--non-numeric">${time}</td><td>${data.sensorId}</td><td>${data.hmdt}</td><td>${data.temp}</td></tr>`);
+            });
+
+            // Keep a tidy number of 25 table rows
+            $('table tbody tr').slice(10).remove();
+
+            // Update dataset
+            chart.push([
+                { time: Date.now(), y: data.content[0].hmdt },
+                { time: Date.now(), y: data.content[1].hmdt },
+                { time: Date.now(), y: data.content[2].hmdt }
+            ]);
+
+        });
+
+        $(document).ready(function () {
+
+            // Create chart with Epoch
+            chart = $('#chart').epoch({
+                type: 'time.line',
+                axes: ['left', 'bottom', 'right'],
+                data: [
+                    {
+                        label: "Device 1", values: []
+                    },
+                    {
+                        label: "Device 2", values: []
+                    },
+                    {
+                        label: "Device 3", values: []
+                    }
+                ]
+            });
+
+        });
+    </script>
+
+</body>
+
+</html>

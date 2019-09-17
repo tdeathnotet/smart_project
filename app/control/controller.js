@@ -8,6 +8,10 @@ var checkDecode_TV
 var decode_AC
 var checkDecode_AC
 
+//__________________data smartgarden______________
+var smartGarden
+var gardenOn_Off
+
 const controller = {
     decodeTVRemote(req,res){
       var button_tv = req.body.button
@@ -182,11 +186,24 @@ const controller = {
       res.json({"Button" : Button })
     },
     apiSmartGarden(req,res){ //__________Smart garden__________
-      console.log(req.body)
-     controlModel.addSensor(req.body)
+      console.log(req.body)  
+      smartGarden = req.body
+     controlModel.addSensor(req.body)  //ส่งค่าไปเก็บยัง mySQL
+
+     //res.status(200).json(req.body)
     },
-    handler
-          
+
+    showSmartGarden(req,res){
+      res.json(smartGarden)
+    },
+    getSwitch(req,res){
+      console.log(req.body.smart_garden)
+      gardenOn_Off = req.body.smart_garden
+    },
+    statusGarden(req,res){
+      res.json({"status" : gardenOn_Off })
+    }
+
     
 }
 export default controller 

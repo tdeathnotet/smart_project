@@ -75,7 +75,7 @@ const controlModel = {
             pool.query('UPDATE `smart_garden` SET '+column+' = ? , '+column2+' = ? , '+column3+' = ?, '+column4+' = ?' ,[value,value2,value3,value4], 
             function(err,result,fields){
                 if(err) throw err;
-                //console.log(".")
+                console.log("save SQL!!")
                 return resolve(result)
             })
         })

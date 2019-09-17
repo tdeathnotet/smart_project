@@ -105,6 +105,8 @@ decode_type_t strToDecodeType(const char * const str) {
     return decode_type_t::DAIKIN;
   else if (!strcasecmp(str, "DAIKIN160"))
     return decode_type_t::DAIKIN160;
+  else if (!strcasecmp(str, "DAIKIN176"))
+    return decode_type_t::DAIKIN176;
   else if (!strcasecmp(str, "DAIKIN2"))
     return decode_type_t::DAIKIN2;
   else if (!strcasecmp(str, "DAIKIN216"))
@@ -235,68 +237,6 @@ decode_type_t strToDecodeType(const char * const str) {
     return decode_type_t::UNKNOWN;
 }
 
-// Escape any special HTML (unsafe) characters in a string. e.g. anti-XSS.
-// Args:
-//   unescaped: A string containing text to make HTML safe.
-// Returns:
-//   A string that is HTML safe.
-String htmlEscape(const String unescaped) {
-  String result = "";
-  uint16_t ulen = unescaped.length();
-  result.reserve(ulen);  // The result will be at least the size of input.
-  for (size_t i = 0; i < ulen; i++) {
-    char c = unescaped[i];
-    switch (c) {
-      // ';!-"<>=&#{}() are all unsafe.
-      case '\'':
-        result += F("&apos;");
-        break;
-      case ';':
-        result += F("&semi;");
-        break;
-      case '!':
-        result += F("&excl;");
-        break;
-      case '-':
-        result += F("&dash;");
-        break;
-      case '\"':
-        result += F("&quot;");
-        break;
-      case '<':
-        result += F("&lt;");
-        break;
-      case '>':
-        result += F("&gt;");
-        break;
-      case '=':
-        result += F("&#equals;");
-        break;
-      case '&':
-        result += F("&amp;");
-        break;
-      case '#':
-        result += F("&num;");
-        break;
-      case '{':
-        result += F("&lcub;");
-        break;
-      case '}':
-        result += F("&rcub;");
-        break;
-      case '(':
-        result += F("&lpar;");
-        break;
-      case ')':
-        result += F("&rpar;");
-        break;
-      default:
-        result += c;
-    }
-  }
-  return result;
-}
-
 // Convert a protocol type (enum etc) to a human readable string.
 // Args:
 //   protocol: Nr. (enum) of the protocol.
@@ -326,6 +266,9 @@ String typeToString(const decode_type_t protocol, const bool isRepeat) {
       break;
     case DAIKIN160:
       result = F("DAIKIN160");
+      break;
+    case DAIKIN176:
+      result = F("DAIKIN176");
       break;
     case DAIKIN2:
       result = F("DAIKIN2");
@@ -522,6 +465,7 @@ bool hasACState(const decode_type_t protocol) {
     case ARGO:
     case DAIKIN:
     case DAIKIN160:
+    case DAIKIN176:
     case DAIKIN2:
     case DAIKIN216:
     case ELECTRA_AC:
@@ -571,10 +515,9 @@ uint16_t getCorrectedRawLength(const decode_results * const results) {
 // in a C/C++ code style format.
 String resultToSourceCode(const decode_results * const results) {
   String output = "";
-  String showData ="";
   // Reserve some space for the string to reduce heap fragmentation.
   output.reserve(1536);  // 1.5KB should cover most cases.
-  // Start declaration
+  // // Start declaration
   // output += F("uint16_t ");  // variable type
   // output += F("rawData[");   // array name
   // output += uint64ToString(getCorrectedRawLength(results), 10);
@@ -598,7 +541,7 @@ String resultToSourceCode(const decode_results * const results) {
     if (i % 2 == 0) output += ' ';  // Extra if it was even.
   }
 
-//   // End declaration
+  // End declaration
 //   output += F("};");
 
 //   // Comment
@@ -838,4 +781,67 @@ namespace IRutils {
       result += F("UNKNOWN");
     return result + ')';
   }
+
+  // Escape any special HTML (unsafe) characters in a string. e.g. anti-XSS.
+  // Args:
+  //   unescaped: A string containing text to make HTML safe.
+  // Returns:
+  //   A string that is HTML safe.
+  String htmlEscape(const String unescaped) {
+    String result = "";
+    uint16_t ulen = unescaped.length();
+    result.reserve(ulen);  // The result will be at least the size of input.
+    for (size_t i = 0; i < ulen; i++) {
+      char c = unescaped[i];
+      switch (c) {
+        // ';!-"<>=&#{}() are all unsafe.
+        case '\'':
+          result += F("&apos;");
+          break;
+        case ';':
+          result += F("&semi;");
+          break;
+        case '!':
+          result += F("&excl;");
+          break;
+        case '-':
+          result += F("&dash;");
+          break;
+        case '\"':
+          result += F("&quot;");
+          break;
+        case '<':
+          result += F("&lt;");
+          break;
+        case '>':
+          result += F("&gt;");
+          break;
+        case '=':
+          result += F("&#equals;");
+          break;
+        case '&':
+          result += F("&amp;");
+          break;
+        case '#':
+          result += F("&num;");
+          break;
+        case '{':
+          result += F("&lcub;");
+          break;
+        case '}':
+          result += F("&rcub;");
+          break;
+        case '(':
+          result += F("&lpar;");
+          break;
+        case ')':
+          result += F("&rpar;");
+          break;
+        default:
+          result += c;
+      }
+    }
+    return result;
+  }
+
 }  // namespace IRutils

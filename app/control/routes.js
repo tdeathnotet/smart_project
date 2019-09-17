@@ -31,4 +31,7 @@ export function setup(router){
 
     //_________________________SMART GARDEN_________________________________________
     router.post('/api/smart_garden',controller.apiSmartGarden)
+    router.post('/smartgarden/on_off',controller.getSwitch)
+    router.get('/smartgarden',controller.showSmartGarden)
+    router.get('/smartgarden/status',controller.statusGarden)
 }
