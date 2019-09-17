@@ -1,4 +1,6 @@
-#include "DHT.h"
+#include <Adafruit_Sensor.h>
+#include <DHT.h>
+#include <DHT_U.h>
 #include <BH1750FVI.h>
 #include <ArduinoJson.h>
 #include <ESP8266HTTPClient.h>
@@ -10,9 +12,14 @@ const char* MY_PWD =  "thinkbeyond03";
 //const char* MY_SSID = "26SW_AIS2.4G";
 //const char* MY_PWD =  "58543206";
 
+  //_______________เช็นเซอร์อุหภูมิ_________________________
+  float h ; //ความชื้น
+  float t ; //องศาเซลเซียส
+  float f ; //องศาฟาเรนไฮ
 
+//______________________SERVER________________________
 
-String statusDevice = "";
+String statusDevice = "OFF";
 const String IP =  "http://192.168.1.13:4000";  //ip *เครื่อง *Server
 HTTPClient http;
 
@@ -21,9 +28,10 @@ HTTPClient http;
 
 //___________________ตั้งค่า Sensor ___________________________________________
 BH1750FVI LightSensor(BH1750FVI::k_DevModeContLowRes);  //ขาเซ็นเซอร์แสงเป็น D1, D2 (scl, sda)
-#define DHTPIN 14     // what digital pin we're connected to
+#define DHTPIN 14     // what digital pin we're connected to D5,gpio14
 #define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
-DHT dht(DHTPIN, DHTTYPE);
+
+DHT_Unified dht(DHTPIN, DHTTYPE);
 
 
 void httpGet(){  //รับค่าจาก Saver เป็น http gets
@@ -39,22 +47,23 @@ void httpGet(){  //รับค่าจาก Saver เป็น http gets
       //Serial.println(http.GET());
       
  //____________________รับปุ่มTV_______________________________________     
-        if(button == "ON" ){
+        if(button == "ON" ){  // pumpทำงาน
           Serial.println(" SMART GARDEN : " + button );
           digitalWrite(PIN,HIGH); // Pin D0 is HIGH
           statusDevice = button;
+
+          //delay(1000);
           //command
         }
-        if(button == "OFF" ){
+        else{
           //command
           Serial.println(" SMART GARDEN : " + button );
           digitalWrite(PIN,LOW); // Pin D0 is LOW
-          statusDevice = button;
+          statusDevice = "OFF";
         }
 
         
-    sensor();   //อ่านค่าจาก Sensor   
-    send_toSQL();  //ส่งข้อมูลไปเก็บยัง Data
+
     jsonBuffer.clear();
    }
      http.end();   //Close connection
@@ -63,38 +72,65 @@ void httpGet(){  //รับค่าจาก Saver เป็น http gets
 
 void sensor(){
   //_______________เช็นเซอร์อุหภูมิ_________________________
-  float h = dht.readHumidity();
-  float t = dht.readTemperature();
-  float f = dht.readTemperature(true);
-  
+//  float h = dht.readHumidity(); 
+//  float t = dht.readTemperature();
+//  float f = dht.readTemperature(true);
+    sensors_event_t event;  
+    dht.temperature().getEvent(&event);
+    if (isnan(event.temperature)) {
+      Serial.println("Error reading temperature!");
+    }
+    else {
+      Serial.print("Temperature: ");
+      t = event.temperature;
+      Serial.print(t);
+      Serial.print(" *C\t");
+      Serial.print("Temperature: ");
+      f = ((1.8 * event.temperature) + 32 );
+      Serial.print(f);
+      Serial.print(" F\t");
+    }
+    // Get humidity event and print its value.
+    dht.humidity().getEvent(&event);
+    if (isnan(event.relative_humidity)) {
+      Serial.println("Error reading humidity!");
+    }
+    else {
+      Serial.print("Humidity: ");
+      h = event.relative_humidity;
+      Serial.print(h);
+      
+      Serial.println("%");
+    }
+    
         //________________________เซ็นเซอร์แสง____________________
   uint16_t lux = LightSensor.GetLightIntensity(); 
     
     
 //______________________________แสดงค่าออกทาง หน้าจอ________________________
-  Serial.print("Humidity: ");
-  Serial.print(h);
-  Serial.print(" %\t");
-  Serial.print("Temperature: ");
-  Serial.print(t);
-  Serial.print(" *C ");
-  Serial.print(f);
-  Serial.print(" *F\t  ");
+//  Serial.print("Humidity: ");
+//  Serial.print(h);
+//  Serial.print(" %\t");
+//  Serial.print("Temperature: ");
+//  Serial.print(t);
+//  Serial.print(" *C ");
+//  Serial.print(f);
+//  Serial.print(" *F\t  ");
   Serial.print("Light: "); Serial.print(lux); Serial.println(" lux");  //แสดงค่าความเข้มของแสงออกทาง serial
 }
 
 
 void send_toSQL(){ 
 //_____________________JSON HTTP______________________________________________________________________________________
-    if (WiFi.status() == WL_CONNECTED) { //Check WiFi connection status
+    
       StaticJsonBuffer<500> JSONbuffer;   //Declaring static JSON buffer
       JsonObject& root = JSONbuffer.createObject(); 
       root["column"] = "sensor_humi";
-      root["value"] =  dht.readHumidity();
+      root["value"] =  h;
       root["column2"] = "sensor_tempC";
-      root["value2"] = dht.readTemperature();
+      root["value2"] = t;
       root["column3"] = "sensor_tempF";
-      root["value3"] = dht.readTemperature(true);
+      root["value3"] = f;
       root["column4"] = "sensor_light";
       root["value4"] = LightSensor.GetLightIntensity();
       root["status"] = statusDevice;  //สถานะการทำงานของ pump
@@ -112,10 +148,8 @@ void send_toSQL(){
 //      Serial.print("httpCode :");
 //      Serial.println(payload);    //Print request response payload
 //      Serial.println(httpCode);   //Print HTTP return code
-      //http.end();  //Close connection  
-    }else {
-      Serial.println("Error in WiFi connection"); 
-    }   
+      http.end();  //Close connection  
+      
 }
 
 
@@ -150,7 +184,12 @@ void setup() {
 
 
 void loop() {
-  httpGet();
-  
-  delay(1000);
+   if (WiFi.status() == WL_CONNECTED) { 
+    sensor();   //อ่านค่าจาก Sensor   
+    httpGet(); //ส่งไปแสดงค่า ยังหน้าเว็บ
+    send_toSQL();  //ส่งข้อมูลไปเก็บยัง Data
+    delay(1000);
+  }else {
+      Serial.println("Error in WiFi connection"); 
+    } 
 }

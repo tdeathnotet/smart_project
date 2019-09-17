@@ -27,12 +27,7 @@ function setupRoutes(app){
 export function setup(){
     const app = express()
     const PORT = 4000
-
-    //socket.io
-    const server = require('http').createServer(app);
-    const io = require('socket.io').listen(server);
-
-
+    
     //app.use(auth)
     app.use(express.static(__dirname + '/uploads'));
     app.use(bodyParser.urlencoded({ extended: true }))

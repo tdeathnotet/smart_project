@@ -186,9 +186,9 @@ const controller = {
       res.json({"Button" : Button })
     },
     apiSmartGarden(req,res){ //__________Smart garden__________
-      console.log(req.body)  
+      // console.log(req.body)  
       smartGarden = req.body
-     controlModel.addSensor(req.body)  //ส่งค่าไปเก็บยัง mySQL
+    // controlModel.addSensor(req.body)  //ส่งค่าไปเก็บยัง mySQL
 
      //res.status(200).json(req.body)
     },
@@ -197,13 +197,24 @@ const controller = {
       res.json(smartGarden)
     },
     getSwitch(req,res){
-      console.log(req.body.smart_garden)
-      gardenOn_Off = req.body.smart_garden
+      console.log(req.body.smartgarden)
+      var check = req.body.smartgarden
+      if (check == "ON"){
+        gardenOn_Off = "ON"
+      }else{
+        gardenOn_Off = "OFF"
+      }
+
     },
     statusGarden(req,res){
-      res.json({"status" : gardenOn_Off })
-    }
 
-    
+      //console.log(gardenOn_Off)
+      if(gardenOn_Off == "ON"){
+        res.json({"status" : gardenOn_Off }).status(200)
+      }
+      else{
+        res.json({"status" : "OFF" }).status(200)
+      }
+    }
 }
 export default controller 
