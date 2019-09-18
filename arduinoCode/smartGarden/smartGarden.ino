@@ -6,6 +6,9 @@
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WiFi.h>
 
+
+
+
 //__________________ตั้งค่า Wifi และ Saver___________________________
 const char* MY_SSID = "icute3";
 const char* MY_PWD =  "thinkbeyond03";
@@ -16,6 +19,7 @@ const char* MY_PWD =  "thinkbeyond03";
   float h ; //ความชื้น
   float t ; //องศาเซลเซียส
   float f ; //องศาฟาเรนไฮ
+  uint16_t lux ;
 
 //______________________SERVER________________________
 
@@ -35,18 +39,14 @@ DHT_Unified dht(DHTPIN, DHTTYPE);
 
 
 void httpGet(){  //รับค่าจาก Saver เป็น http gets
-    
-
-    
     http.begin(IP + "/control/smartgarden/status");
     int httpCode = http.GET();                                             
     if(httpCode > 0){   //Check the returning code    
-      StaticJsonBuffer<200> jsonBuffer;
+      StaticJsonBuffer<300> jsonBuffer;
       JsonObject& root = jsonBuffer.parseObject(http.getString());
       String button = root["status"];   //Check JSON
       //Serial.println(http.GET());
       
- //____________________รับปุ่มTV_______________________________________     
         if(button == "ON" ){  // pumpทำงาน
           Serial.println(" SMART GARDEN : " + button );
           digitalWrite(PIN,HIGH); // Pin D0 is HIGH
@@ -61,14 +61,10 @@ void httpGet(){  //รับค่าจาก Saver เป็น http gets
           digitalWrite(PIN,LOW); // Pin D0 is LOW
           statusDevice = "OFF";
         }
-
-        
-
     jsonBuffer.clear();
    }
-     http.end();   //Close connection
+   http.end();   //Close connection
 }
-
 
 void sensor(){
   //_______________เช็นเซอร์อุหภูมิ_________________________
@@ -100,29 +96,15 @@ void sensor(){
       h = event.relative_humidity;
       Serial.print(h);
       
-      Serial.println("%");
+      Serial.print("%\t");
     }
-    
-        //________________________เซ็นเซอร์แสง____________________
-  uint16_t lux = LightSensor.GetLightIntensity(); 
-    
-    
-//______________________________แสดงค่าออกทาง หน้าจอ________________________
-//  Serial.print("Humidity: ");
-//  Serial.print(h);
-//  Serial.print(" %\t");
-//  Serial.print("Temperature: ");
-//  Serial.print(t);
-//  Serial.print(" *C ");
-//  Serial.print(f);
-//  Serial.print(" *F\t  ");
+   //________________________เซ็นเซอร์แสง____________________
+   lux = LightSensor.GetLightIntensity(); 
   Serial.print("Light: "); Serial.print(lux); Serial.println(" lux");  //แสดงค่าความเข้มของแสงออกทาง serial
 }
 
-
-void send_toSQL(){ 
+void toServer(){ 
 //_____________________JSON HTTP______________________________________________________________________________________
-    
       StaticJsonBuffer<500> JSONbuffer;   //Declaring static JSON buffer
       JsonObject& root = JSONbuffer.createObject(); 
       root["column"] = "sensor_humi";
@@ -132,9 +114,8 @@ void send_toSQL(){
       root["column3"] = "sensor_tempF";
       root["value3"] = f;
       root["column4"] = "sensor_light";
-      root["value4"] = LightSensor.GetLightIntensity();
+      root["value4"] = lux ;
       root["status"] = statusDevice;  //สถานะการทำงานของ pump
-
       
       char JSONmessageBuffer[500];
       root.prettyPrintTo(JSONmessageBuffer, sizeof(JSONmessageBuffer));
@@ -142,23 +123,19 @@ void send_toSQL(){
 
       http.begin(IP + "/control/api/smart_garden");      //ปลายทางที่เราจะส่ง JSONไป
       http.addHeader("Content-Type", "application/json");  //Specify content-type header
-
-      int httpCode = http.POST(JSONmessageBuffer);   //Send the request
-      String payload = http.getString(); //Get the response payload
+      http.POST(JSONmessageBuffer);   //Send the request
+      //http.getString(); //Get the response payload
 //      Serial.print("httpCode :");
 //      Serial.println(payload);    //Print request response payload
 //      Serial.println(httpCode);   //Print HTTP return code
+      JSONbuffer.clear();
       http.end();  //Close connection  
-      
 }
 
 
 void setup() {
   Serial.begin(115200);
-  Serial.println("DHTxx test!");
-
   //_____________________________Ceonnect Wifi____________________________________________
-
 
   Serial.print("Connecting to " + *MY_SSID);
   WiFi.begin(MY_SSID, MY_PWD);
@@ -170,15 +147,11 @@ void setup() {
   Serial.print("WIFI connected! , to IP address: ");
   Serial.println(WiFi.localIP());
   Serial.println("");
-
-  
-
   
 //_____________________________เปิดขา Sensor__________________________-
   dht.begin();
   LightSensor.begin();
   pinMode(PIN,OUTPUT);
-
 
 }
 
@@ -187,9 +160,9 @@ void loop() {
    if (WiFi.status() == WL_CONNECTED) { 
     sensor();   //อ่านค่าจาก Sensor   
     httpGet(); //ส่งไปแสดงค่า ยังหน้าเว็บ
-    send_toSQL();  //ส่งข้อมูลไปเก็บยัง Data
-    delay(1000);
+    toServer();  //ส่งข้อมูลไปเก็บยัง Data
+    delay(500); //No more than 0.5 Hz sampling rate (once every 2 seconds)
   }else {
       Serial.println("Error in WiFi connection"); 
-    } 
+    }
 }

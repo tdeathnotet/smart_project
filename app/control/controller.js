@@ -186,9 +186,9 @@ const controller = {
       res.json({"Button" : Button })
     },
     apiSmartGarden(req,res){ //__________Smart garden__________
-      // console.log(req.body)  
+      //console.log(req.body)  
       smartGarden = req.body
-    // controlModel.addSensor(req.body)  //ส่งค่าไปเก็บยัง mySQL
+   // controlModel.addSensor(req.body)  //ส่งค่าไปเก็บยัง mySQL
 
      //res.status(200).json(req.body)
     },
@@ -200,8 +200,9 @@ const controller = {
       console.log(req.body.smartgarden)
       var check = req.body.smartgarden
       if (check == "ON"){
-        gardenOn_Off = "ON"
-      }else{
+        gardenOn_Off = "ON" 
+      }
+      if( check =="OFF"){
         gardenOn_Off = "OFF"
       }
 
