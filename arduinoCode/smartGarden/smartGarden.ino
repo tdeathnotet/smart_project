@@ -6,29 +6,23 @@
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WiFi.h>
 
-
-
-
 //__________________ตั้งค่า Wifi และ Saver___________________________
 const char* MY_SSID = "icute3";
 const char* MY_PWD =  "thinkbeyond03";
 //const char* MY_SSID = "26SW_AIS2.4G";
 //const char* MY_PWD =  "58543206";
-
   //_______________เช็นเซอร์อุหภูมิ_________________________
   float h ; //ความชื้น
   float t ; //องศาเซลเซียส
   float f ; //องศาฟาเรนไฮ
   uint16_t lux ;
-
 //______________________SERVER________________________
 
 String statusDevice = "OFF";
-const String IP =  "http://192.168.1.13:4000";  //ip *เครื่อง *Server
+const String IP =  "http://192.168.1.15:4000";  //ip *เครื่อง *Server
 HTTPClient http;
 
 #define PIN 16 //Relay pin ( gpio16 , D0 ) for ESP8266
-
 
 //___________________ตั้งค่า Sensor ___________________________________________
 BH1750FVI LightSensor(BH1750FVI::k_DevModeContLowRes);  //ขาเซ็นเซอร์แสงเป็น D1, D2 (scl, sda)
@@ -36,7 +30,6 @@ BH1750FVI LightSensor(BH1750FVI::k_DevModeContLowRes);  //ขาเซ็นเ�
 #define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
 
 DHT_Unified dht(DHTPIN, DHTTYPE);
-
 
 void httpGet(){  //รับค่าจาก Saver เป็น http gets
     http.begin(IP + "/control/smartgarden/status");
@@ -51,7 +44,6 @@ void httpGet(){  //รับค่าจาก Saver เป็น http gets
           Serial.println(" SMART GARDEN : " + button );
           digitalWrite(PIN,HIGH); // Pin D0 is HIGH
           statusDevice = button;
-
           //delay(1000);
           //command
         }

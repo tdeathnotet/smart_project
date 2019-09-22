@@ -11,7 +11,7 @@
 
 const char* MY_SSID = "icute3";
 const char* MY_PWD =  "thinkbeyond03";
-const String IP =  "http://192.168.1.13:4000";  //ip *เครื่อง *Server : port
+const String IP =  "http://192.168.1.15:4000";  //ip *เครื่อง *Server : port
 HTTPClient http;
 
 //const char* MY_SSID = "26SW_AIS2.4G";
