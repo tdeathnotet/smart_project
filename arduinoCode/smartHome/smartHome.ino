@@ -2,16 +2,20 @@
 //#include <WiFiManager.h> 
 #include <IRremoteESP8266.h>
 #include <ESP8266HTTPClient.h>
-#include <ESP8266WiFi.h>
-#include <ArduinoJson.h>
+#include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
+#include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager
+#include <ArduinoJson.h>  //5.08
 #include <IRutils.h>
 #include <IRac.h>
 #include <IRrecv.h>
 #include <IRsend.h>
 
+
+//define your default values here, if there are different values in config.json, they are overwritten.
+char mqtt_server[50] = "http://192.168.1.11:4000";  //หาจาก cmd  #ipconfig 
+String IP = "";
 const char* MY_SSID = "icute3";
 const char* MY_PWD =  "thinkbeyond03";
-const String IP =  "http://192.168.1.15:4000";  //ip *เครื่อง *Server : port
 HTTPClient http;
 
 //const char* MY_SSID = "26SW_AIS2.4G";
@@ -35,13 +39,18 @@ const uint8_t kTimeout = 15;
 const uint16_t kMinUnknownSize = 12;
 
 
-
-
-
-
-
 IRrecv irrecv(kRecvPin, kCaptureBufferSize, kTimeout, true);
 decode_results results;  // Somewhere to store the results
+
+
+//flag for saving data
+bool shouldSaveConfig = false;
+//callback notifying us of the need to save config
+void saveConfigCallback () {
+  Serial.println("Should save config");
+  shouldSaveConfig = true;
+}
+
 
 void getAndSendTV(String Data){
     String url = (IP + "/control/tv/" + Data) ; // คอลัม
@@ -498,34 +507,35 @@ void setup() {
 
 
 //_____________________________Ceonnect Wifi____________________________________________
+    WiFiManagerParameter custom_mqtt_server("server", "Server address", mqtt_server, 40);
+    //WiFiManager
+    //Local intialization. Once its business is done, there is no need to keep it around
+    WiFiManager wifiManager;
+    //set config save notify callback
+    wifiManager.setSaveConfigCallback(saveConfigCallback);
+    //add all your parameters here
+    wifiManager.addParameter(&custom_mqtt_server);
 
-
-  Serial.print("Connecting to " + *MY_SSID);
-  WiFi.begin(MY_SSID, MY_PWD);
-
-  while (WiFi.status() != WL_CONNECTED){
-      delay(500);
-      Serial.print(".");
-  }
-  Serial.print("WIFI connected! , to IP address: ");
-  Serial.println(WiFi.localIP());
-  Serial.println("");
-
+    
+    //***_____________reset settings - for testing_____________________**
+    wifiManager.resetSettings();  //อย่าใส่ commnent ออก เพราะจะรีเซ็ตทุกครั้ง ...
   
-//    Serial.println("--------- DECOD TV REMOTE-------------");
-//    Serial.println("Enter ' 0 ' ON Button ");
-//    Serial.println("Enter ' 5 ' OK Button");
-//    Serial.println("Enter ' 8 ' ▲ Button");
-//    Serial.println("Enter ' 2 ' ▼ Button");
-//    Serial.println("Enter ' 4 ' ◀ Button");
-//    Serial.println("Enter ' 6 ' ▶ Button");
-//    Serial.println("Enter ' + ' Vol+ Button ");
-//    Serial.println("Enter ' - ' vol- Button ");
-//    Serial.println("Enter ' 9 ' CH ▲ Button");
-//    Serial.println("Enter ' 3 ' CH ▼ Button");
-//    Serial.println("Enter ' 1 ' ↺Return,Exit Button");
-//    Serial.println("Enter ' 7 ' Mute Button");  
+    if (!wifiManager.autoConnect("SMART_HOME", "admin")) {   //ssid & password เข้าตั้งค่า ip และหาข้อมูล
+      Serial.println("failed to connect and hit timeout");
+      delay(3000);
+      //reset and try again, or maybe put it to deep sleep
+      ESP.reset();
+      delay(5000);
+    }
+    //if you get here you have connected to the WiFi
+    Serial.println("Connected!......  :)");
+    //read updated parameters
+    strcpy(mqtt_server, custom_mqtt_server.getValue());
+    IP = String(mqtt_server); 
+    Serial.println("local ip");
+    Serial.println(WiFi.localIP());
 
+    
     irsend.begin();  //เปิดpin ในการส่ง IR
 
 }

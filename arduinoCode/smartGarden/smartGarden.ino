@@ -1,16 +1,13 @@
 #include <Adafruit_Sensor.h>
-#include <DHT.h>
+#include <DHT.h> 
 #include <DHT_U.h>
-#include <BH1750FVI.h>
-#include <ArduinoJson.h>
+#include <BH1750FVI.h> 
+#include <ArduinoJson.h>  //v.5.0
 #include <ESP8266HTTPClient.h>
-#include <ESP8266WiFi.h>
+#include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
+#include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager
 
-//__________________ตั้งค่า Wifi และ Saver___________________________
-const char* MY_SSID = "icute3";
-const char* MY_PWD =  "thinkbeyond03";
-//const char* MY_SSID = "26SW_AIS2.4G";
-//const char* MY_PWD =  "58543206";
+
   //_______________เช็นเซอร์อุหภูมิ_________________________
   float h ; //ความชื้น
   float t ; //องศาเซลเซียส
@@ -18,8 +15,10 @@ const char* MY_PWD =  "thinkbeyond03";
   uint16_t lux ;
 //______________________SERVER________________________
 
+//define your default values here, if there are different values in config.json, they are overwritten.
+char mqtt_server[50] = "http://192.168.1.11:4000";  //หาจาก cmd  #ipconfig 
+String IP = "";
 String statusDevice = "OFF";
-const String IP =  "http://192.168.1.15:4000";  //ip *เครื่อง *Server
 HTTPClient http;
 
 #define PIN 16 //Relay pin ( gpio16 , D0 ) for ESP8266
@@ -30,6 +29,16 @@ BH1750FVI LightSensor(BH1750FVI::k_DevModeContLowRes);  //ขาเซ็นเ�
 #define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
 
 DHT_Unified dht(DHTPIN, DHTTYPE);
+
+//_______________________flag for saving data___________________________
+bool shouldSaveConfig = false;
+//callback notifying us of the need to save config
+void saveConfigCallback () {
+  Serial.println("Should save config");
+  shouldSaveConfig = true;
+}
+
+
 
 void httpGet(){  //รับค่าจาก Saver เป็น http gets
     http.begin(IP + "/control/smartgarden/status");
@@ -53,7 +62,7 @@ void httpGet(){  //รับค่าจาก Saver เป็น http gets
           digitalWrite(PIN,LOW); // Pin D0 is LOW
           statusDevice = "OFF";
         }
-    jsonBuffer.clear();
+//    jsonBuffer.clear();
    }
    http.end();   //Close connection
 }
@@ -120,25 +129,41 @@ void toServer(){
 //      Serial.print("httpCode :");
 //      Serial.println(payload);    //Print request response payload
 //      Serial.println(httpCode);   //Print HTTP return code
-      JSONbuffer.clear();
+//      JSONbuffer.clear();
       http.end();  //Close connection  
 }
 
 
 void setup() {
   Serial.begin(115200);
+  Serial.println();
   //_____________________________Ceonnect Wifi____________________________________________
 
-  Serial.print("Connecting to " + *MY_SSID);
-  WiFi.begin(MY_SSID, MY_PWD);
+  WiFiManagerParameter custom_mqtt_server("server", "Server address", mqtt_server, 40);
+  //WiFiManager
+  //Local intialization. Once its business is done, there is no need to keep it around
+  WiFiManager wifiManager;
+  //set config save notify callback
+  wifiManager.setSaveConfigCallback(saveConfigCallback);
+  //add all your parameters here
+  wifiManager.addParameter(&custom_mqtt_server);
+  //reset settings - for testing
+  wifiManager.resetSettings();  //อย่าใส่ commnent ออก เพราะจะรีเซ็ตทุกครั้ง ...
 
-  while (WiFi.status() != WL_CONNECTED){
-      delay(500);
-      Serial.print(".");
+  if (!wifiManager.autoConnect("SMART_GARDEN", "admin")) {   //ssid & password เข้าตั้งค่า ip และหาข้อมูล
+    Serial.println("failed to connect and hit timeout");
+    delay(3000);
+    //reset and try again, or maybe put it to deep sleep
+    ESP.reset();
+    delay(5000);
   }
-  Serial.print("WIFI connected! , to IP address: ");
+  //if you get here you have connected to the WiFi
+  Serial.println("Connected!......  :)");
+  //read updated parameters
+  strcpy(mqtt_server, custom_mqtt_server.getValue());
+  IP = String(mqtt_server); 
+  Serial.println("local ip");
   Serial.println(WiFi.localIP());
-  Serial.println("");
   
 //_____________________________เปิดขา Sensor__________________________-
   dht.begin();
