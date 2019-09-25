@@ -518,7 +518,7 @@ void setup() {
 
     
     //***_____________reset settings - for testing_____________________**
-    wifiManager.resetSettings();  //อย่าใส่ commnent ออก เพราะจะรีเซ็ตทุกครั้ง ...
+    //wifiManager.resetSettings();  //อย่าใส่ commnent ออก เพราะจะรีเซ็ตทุกครั้ง ...
   
     if (!wifiManager.autoConnect("SMART_HOME", "admin")) {   //ssid & password เข้าตั้งค่า ip และหาข้อมูล
       Serial.println("failed to connect and hit timeout");
