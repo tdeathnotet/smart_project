@@ -5,7 +5,7 @@ const config = {
     port: 3306,
     user: "root",
     password: "12345678",
-    database : 'smart_home',
+    database : 'smart_project',
     connectionLimit: 100,
 };
 

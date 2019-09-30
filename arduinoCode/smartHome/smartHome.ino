@@ -12,17 +12,15 @@
 
 
 //define your default values here, if there are different values in config.json, they are overwritten.
-char mqtt_server[50] = "http://192.168.1.11:4000";  //หาจาก cmd  #ipconfig 
+char server[50] = "http://192.168.1.13:4000";  //หาจาก cmd  #ipconfig  หรือ server
 String IP = "";
-const char* MY_SSID = "icute3";
-const char* MY_PWD =  "thinkbeyond03";
 HTTPClient http;
 
 //const char* MY_SSID = "26SW_AIS2.4G";
 //const char* MY_PWD =  "58543206";
 
 const uint16_t kRecvPin = D5;  //ขารับสัญญาณ IR
-const uint32_t kBaudRate = 115200;
+const uint32_t kBaudRate = 115200; 
 const uint16_t kCaptureBufferSize = 1024;
 
 const uint16_t kIrLed = D6;  // ขาส่งสัญญาณ IR
@@ -32,14 +30,14 @@ IRsend irsend(kIrLed);  // Set the GPIO to be used to sending the message.
 
 
 #if DECODE_AC
-const uint8_t kTimeout = 50;
+const uint8_t kTimeout = 50; 
 #else   // DECODE_AC
 const uint8_t kTimeout = 15;
 #endif  // DECODE_AC
 const uint16_t kMinUnknownSize = 12;
 
 
-IRrecv irrecv(kRecvPin, kCaptureBufferSize, kTimeout, true);
+IRrecv irrecv(kRecvPin, kCaptureBufferSize, kTimeout, true); //IR receiver setup
 decode_results results;  // Somewhere to store the results
 
 
@@ -52,82 +50,70 @@ void saveConfigCallback () {
 }
 
 
-void getAndSendTV(String Data){
-    String url = (IP + "/control/tv/" + Data) ; // คอลัม
+//____________________________________TV______________________________________
+void getAndSendTV(String Data){ //รับค่าจาก server แล้วส่งออกไปยัง sensor
+    String url = (IP + "/control/tv/" + Data) ; // ร้องขอที่อยู่ขอมูลเป็น parameter
 //    Serial.print("url  ");Serial.println(url);
     http.begin(url);
     int httpCode = http.GET();                                                       
     if(httpCode > 0){   //Check the returning code    
-    const size_t bufferSize = JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(2) + 3000;
-    DynamicJsonBuffer jsonBuffer(bufferSize);
-    JsonArray& JSONcoder = jsonBuffer.parseArray(http.getString());       // Parsing
+    const size_t bufferSize = JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(2) + 3000;  //จองหน่วยความจำบน Esp8266
+    DynamicJsonBuffer jsonBuffer(bufferSize); //ตั้งตัวแปร DynamicJsonBuffer มีขนาดความจำที่จองไว้
+    JsonArray& JSONcoder = jsonBuffer.parseArray(http.getString());  //สร้างตัวแปร json array และเก็บค่า string จาก http get
      
-     String jsonCommand = JSONcoder[0][Data]; // Command MySQL
-     int buffSize = JSONcoder[0][Data+"Buff"]; // Command MySQL
+     String jsonCommand = JSONcoder[0][Data];   // jsonCoammnd = rawData รีโมต ข้อมูลจาก mysql ของarray ตัวแรก 
+     int buffSize = JSONcoder[0][Data+"Buff"];  // buffSize ขนาดของ buffer rawData รีโมต
       // Output to serial monitor
      Serial.print("Button :"); Serial.println(Data);
-     Serial.print("command[");Serial.print(buffSize);Serial.print("] :"); Serial.println(jsonCommand);
+     Serial.print("command[");Serial.print(buffSize);Serial.print("] :"); Serial.println(jsonCommand);  //แสดงขนาดและrawData ผ่านทาง Serial
      
  //------------------ฟังก์ชั้น แปลงค่าString เป็น int  --------------------------------------------------------------------------------------------------
      uint16_t command[buffSize];
-     toIntArray(jsonCommand,buffSize,command);   
-     irsend.sendRaw(command,buffSize, 38); //IR SEND 
+     toIntArray(jsonCommand,buffSize,command);  //แปลงค่า String เป็น Int Array
+     irsend.sendRaw(command,buffSize, 38); //IR SEND  ส่งค่าไปยัง Sensor เพื่อควบคุมอุปกรณ์
     }
      http.end();   //Close connection
 }
 
-void getAndSendAC(String Data){
-    String url = (IP + "/control/ac/" + Data) ; // คอลัม
+//____________________________________Air Condition______________________________________
+void getAndSendAC(String Data){  //รับค่าจาก server แล้วส่งออกไปยัง sensor
+    String url = (IP + "/control/ac/" + Data) ; // ร้องขอที่อยู่ขอมูลเป็น parameter
 //    Serial.print("url  ");Serial.println(url);
     http.begin(url);
     int httpCode = http.GET();                                                       
     if(httpCode > 0){   //Check the returning code  
-
-//      const size_t bufferSize = JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(2) + 3500;
-//      DynamicJsonBuffer jsonBuffer(bufferSize);
-
-    const size_t capacity = JSON_ARRAY_SIZE(2) + JSON_OBJECT_SIZE(3) + 3000;
+    const size_t capacity = JSON_ARRAY_SIZE(2) + JSON_OBJECT_SIZE(3) + 3000; //จองหน่วยความจำบน Esp8266
     DynamicJsonBuffer jsonBuffer(capacity);
-
-    
-    JsonArray& JSONcoder = jsonBuffer.parseArray(http.getString());
-    //JsonArray& root = jsonBuffer.parseArray(http.getString());
-
-     String jsonCommand = JSONcoder[0][Data]; // Command MySQL
-     int buffSize = JSONcoder[0][Data+"Buff"]; // Command MySQL
+    JsonArray& JSONcoder = jsonBuffer.parseArray(http.getString()); //สร้างตัวแปร json array และเก็บค่า string จาก http get
+     String jsonCommand = JSONcoder[0][Data]; // jsonCoammnd = rawData รีโมต ข้อมูลจาก mysql ของarray ตัวแรก 
+     int buffSize = JSONcoder[0][Data+"Buff"]; // buffSize ขนาดของ buffer rawData รีโมต
       // Output to serial monitor
      Serial.print("Button :"); Serial.println(Data);
-     Serial.print("command[");Serial.print(buffSize);Serial.print("] :"); Serial.println(jsonCommand);
+     Serial.print("command[");Serial.print(buffSize);Serial.print("] :"); Serial.println(jsonCommand); //แสดงขนาดและrawData ผ่านทาง Serial
      
  //------------------ฟังก์ชั้น แปลงค่าString เป็น int  --------------------------------------------------------------------------------------------------
      uint16_t command[buffSize];
-     toIntArray(jsonCommand,buffSize,command);   
-     irsend.sendRaw(command,buffSize, 38); //IR SEND 
+     toIntArray(jsonCommand,buffSize,command);    //แปลงค่า String เป็น Int Array
+     irsend.sendRaw(command,buffSize, 38); //IR SEND  ส่งค่าไปยัง Sensor เพื่อควบคุมอุปกรณ์
       
      jsonBuffer.clear();
     }
      http.end();   //Close connection
 }
 
-
 void httpGet(){
-  
-    http.begin(IP + "/control/remote_on/button");
+    http.begin(IP + "/control/remote_on/button"); //รับค่าปุ่มจาก url 
     int httpCode = http.GET();                                             
     if(httpCode > 0){   //Check the returning code    
-     //Serial.print("jsonCommand: ");Serial.println(http.getString());
-//     String On = http.getString();
-//     Serial.println("jsonCommand: " + On);
-  
-      StaticJsonBuffer<200> jsonBuffer;
-      JsonObject& root = jsonBuffer.parseObject(http.getString());
-      String button = root["Button"];   //Check JSON
-//      String button = root["Button"];
-      //Serial.println(http.GET());
+      StaticJsonBuffer<200> jsonBuffer; //จองพื้นที่หน่วยความจำให้ตัวแปร
+      JsonObject& root = jsonBuffer.parseObject(http.getString()); //เก็บค่า string จาก http get ไว้ใน root
+      String button = root["Button"];   //ให้ button เท่ากับค่า json "Button" : ?
       Serial.println(" . ");
- //____________________รับปุ่มTV_______________________________________     
-        if(button == "tv_On" ){
-          getAndSendTV(button);
+
+ //____________________รับปุ่มTV_______________________________________ 
+      
+        if(button == "tv_On" ){  //เช็คค่า button ว่ารับปุ่มไหนมา ใช้ของ TV หรือไม่
+          getAndSendTV(button);   //ส่งค่า button ไปยังfunction getAndSendTV
         }
         if(button == "tv_Up" ){
           getAndSendTV(button);
@@ -163,8 +149,8 @@ void httpGet(){
           getAndSendTV(button);
         }
 //____________________รับปุ่ม AC _______________________________________ 
-        if(button =="air_power"){ 
-          getAndSendAC(button);
+        if(button =="air_power"){   //เช็คค่า button ว่ารับปุ่มไหนมา ใช้ของ ac หรือไม่
+          getAndSendAC(button);     //ส่งค่า button ไปยังfunction getAndSendAC
         }
         if(button =="air_speedFan"){ 
           getAndSendAC(button);
@@ -179,13 +165,13 @@ void httpGet(){
           getAndSendAC(button);
         }
 
-    jsonBuffer.clear();
+    jsonBuffer.clear();  //คืนค่าหน่วยความจำ
    }
      http.end();   //Close connection
 }
 
 
-void toIntArray(String str,int buffSize ,uint16_t* command){
+void toIntArray(String str,int buffSize ,uint16_t* command){  //ฟังก์ชันแปลงค่า String เป็น int Array
     int str_len = str.length()+1;
     int arr[buffSize];
     char toCovrChar[str_len] ;
@@ -196,7 +182,6 @@ void toIntArray(String str,int buffSize ,uint16_t* command){
       arr[index++] = atoi(p);
       p = strtok(NULL,",");
     } 
-//    Serial.print("command[");Serial.print(buffSize);Serial.print("] :");
     command[buffSize]; //กดหมดจำนวนbuffer ให้กับ command
     for(size_t i = 0; i < index; i++){
       command[i] = (uint16_t)arr[i]; //ให้array แต่ละตัวของcommand เท่าarr[i]
@@ -207,6 +192,7 @@ void toIntArray(String str,int buffSize ,uint16_t* command){
 }
 
 
+//__ฟังก์ชัน ส่งค่า คอลัม และ ข้อมูล__ ไปยัง server เพื่อไปเก็บยัง MySQL
 void decodeToSQL(String buttonCode,String rawData,String buttonBuff,int buff){ 
 //_____________________JSON HTTP______________________________________________________________________________________
     if (WiFi.status() == WL_CONNECTED) { //Check WiFi connection status
@@ -237,9 +223,7 @@ void decodeToSQL(String buttonCode,String rawData,String buttonBuff,int buff){
 }
 
 
-//__________________api รหัส ac to SQL_____________________________________________________________________________
-
-
+//__________________api รหัส air condition to SQL_____________________________________________________________________________
 void decode_airToSQL(String buttonCode,String rawData,String buttonBuff,int buff){ 
 //_____________________JSON HTTP______________________________________________________________________________________
     if (WiFi.status() == WL_CONNECTED) { //Check WiFi connection status
@@ -269,6 +253,7 @@ void decode_airToSQL(String buttonCode,String rawData,String buttonBuff,int buff
     }   
 }
 
+//__________________api รหัส air condition to SQL_____________________________________________________________________________
 void decoder_tvRemote(){
     http.begin(IP + "/control/remote/decode/tv_button");
     int httpCode = http.GET();                                             
@@ -285,30 +270,29 @@ void decoder_tvRemote(){
       Serial.println("jsonbutton :" + button);
       Serial.println("Status :" + Status);
 
- //______________________ เช็คว่ามีการรับค่าจากรีโมตไหม_______________________________________________________________     
-       
+     
 
   /*----------------------------------Decode Tv remote  On Button-----------------------------------------*/  
-          if(Status == "1" && button == "tv_On"){
+          if(Status == "1" && button == "tv_On"){ //เช็คค่าที่รับมา 
             Serial.println("You Select TV remote & Decoder ON Button ");  
-            int buffOn = uint64ToString(getCorrectedRawLength(&results), 10).toInt();
-            
+            //เช็คว่ามีการรับค่ามาจาก remote มีขนาด buffer ที่รับมาเท่าไหร่และเก็บค่าไว้ในตัวแปร 
+            int buffOn = uint64ToString(getCorrectedRawLength(&results), 10).toInt();  //แปลง String เป็น int
             String tv_On = resultToSourceCode(&results);// Feed the WDT as the text output can take a while to print.
              // uint16_t command[bufferSize];
             Serial.print("tv_On[");Serial.print(buffOn);Serial.print("] :");Serial.println(tv_On);
             Serial.println("Decoder Success!!"); Serial.println(""); 
-            //httpJSON( "tv_On", tv_On, "tv_OnBuff", buffOn );
-            decodeToSQL(button,tv_On, "tv_OnBuff" ,buffOn);
+            decodeToSQL(button,tv_On, "tv_OnBuff" ,buffOn); //ส่งค่าไปยัง Server และเก็บลงยัง mySQL
         }
   /*----------------------------------Decode Tv remote  ' + ' vol+ Button-----------------------------------------*/ 
          if(Status == "1" && button == "tv_VolUp"){   
             Serial.println("You Select TV remote & Decoder Vol+ Button");
+            //เช็คว่ามีการรับค่ามาจาก remote มีขนาด buffer ที่รับมาเท่าไหร่และเก็บค่าไว้ในตัวแปร 
             int buffVolUp = uint64ToString(getCorrectedRawLength(&results), 10).toInt();
             String tv_VolUp = resultToSourceCode(&results);// Feed the WDT as the text output can take a while to print.
             // uint16_t command[bufferSize];
             Serial.print("tv_volUp[");Serial.print(buffVolUp);Serial.print("] :");Serial.println(tv_VolUp);
             Serial.println("Decoder Success!!"); Serial.println("");
-            decodeToSQL( "tv_VolUp", tv_VolUp, "tv_VolUpBuff", buffVolUp );
+            decodeToSQL( "tv_VolUp", tv_VolUp, "tv_VolUpBuff", buffVolUp ); //ส่งค่าไปยัง Server และเก็บลงยัง mySQL
           } 
   /*----------------------------------Decode Tv remote  ' - ' vol- Button-----------------------------------------*/     
            if( Status == "1" && button == "tv_VolDown"){   
@@ -496,7 +480,8 @@ void setup() {
 //______________________________Basic Setting__________________________________________    
   Serial.begin(115200);
   Serial.printf("\nIRrecvDumpV2 is now running and waiting for IR input on Pin "
-                  "%d\n", kRecvPin);
+                  "%d\n", kRecvPin);   //__________แสดงขารับสัญญาณ
+  
 
 //______________________________เปิดขา IR recv__________________________________________                 
   #if DECODE_HASH
@@ -506,42 +491,41 @@ void setup() {
     irrecv.enableIRIn();  // Start the receiver
 
 
-//_____________________________Ceonnect Wifi____________________________________________
-    WiFiManagerParameter custom_mqtt_server("server", "Server address", mqtt_server, 40);
-    //WiFiManager
-    //Local intialization. Once its business is done, there is no need to keep it around
-    WiFiManager wifiManager;
-    //set config save notify callback
-    wifiManager.setSaveConfigCallback(saveConfigCallback);
-    //add all your parameters here
-    wifiManager.addParameter(&custom_mqtt_server);
-
-    
-    //***_____________reset settings - for testing_____________________**
-    //wifiManager.resetSettings();  //อย่าใส่ commnent ออก เพราะจะรีเซ็ตทุกครั้ง ...
+//___________________________WiFiManager_________________________
+  WiFiManagerParameter custom_server("server", "Server address", server, 40);   
   
-    if (!wifiManager.autoConnect("SMART_HOME", "admin")) {   //ssid & password เข้าตั้งค่า ip และหาข้อมูล
-      Serial.println("failed to connect and hit timeout");
-      delay(3000);
-      //reset and try again, or maybe put it to deep sleep
-      ESP.reset();
-      delay(5000);
-    }
-    //if you get here you have connected to the WiFi
-    Serial.println("Connected!......  :)");
-    //read updated parameters
-    strcpy(mqtt_server, custom_mqtt_server.getValue());
-    IP = String(mqtt_server); 
-    Serial.println("local ip");
-    Serial.println(WiFi.localIP());
+  //Local intialization. Once its business is done, there is no need to keep it around
+  WiFiManager wifiManager;
+  //set config save notify callback
+  wifiManager.setSaveConfigCallback(saveConfigCallback);
+  //add all your parameters here
+  wifiManager.addParameter(&custom_server);
+  //reset settings - for testing
+  wifiManager.resetSettings();  //อย่าใส่ commnent ออก เพราะจะรีเซ็ตทุกครั้ง ...
 
+  if (!wifiManager.autoConnect("SMART_GARDEN", "admin")) {   //ssid & password เข้าตั้งค่า ip และหาข้อมูล
+    Serial.println("failed to connect and hit timeout");
+    delay(3000);
+    //reset and try again, or maybe put it to deep sleep
+    ESP.reset();
+    delay(5000);
+  }
+  //if you get here you have connected to the WiFi
+  Serial.println("Connected!......  :)");
+  //read updated parameters
+  strcpy(server, custom_server.getValue());
+  IP = String(server); 
+  Serial.println("local ip");
+  Serial.println(WiFi.localIP());
+
+  
     
     irsend.begin();  //เปิดpin ในการส่ง IR
 
 }
 
 void loop() {
-    if(irrecv.decode(&results)){
+    if(irrecv.decode(&results)){   // เช็คว่ามีการรับค่าจากรีโมตไหม_______________________________________________________________     
       decoder_tvRemote();  //เข้าฟังชั่นเช็คค่าว่ารับปุ่มทีวีไหนมา decode
       decoder_acRemote(); //เข้าฟังชั่นเช็คค่าว่ารับปุ่มแอร์ไหนมา decode
       Serial.println("Next.... "); 

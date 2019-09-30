@@ -12,11 +12,11 @@
   float h ; //ความชื้น
   float t ; //องศาเซลเซียส
   float f ; //องศาฟาเรนไฮ
-  uint16_t lux ;
+  uint16_t lux ; //ความเข้มของแสง
 //______________________SERVER________________________
 
 //define your default values here, if there are different values in config.json, they are overwritten.
-char mqtt_server[50] = "http://192.168.1.11:4000";  //หาจาก cmd  #ipconfig 
+char server[50] = "http://192.168.1.11:4000";  //หาจาก cmd  #ipconfig 
 String IP = "";
 String statusDevice = "OFF";
 HTTPClient http;
@@ -28,7 +28,8 @@ BH1750FVI LightSensor(BH1750FVI::k_DevModeContLowRes);  //ขาเซ็นเ�
 #define DHTPIN 14     // what digital pin we're connected to D5,gpio14
 #define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
 
-DHT_Unified dht(DHTPIN, DHTTYPE);
+DHT_Unified dht(DHTPIN, DHTTYPE); //DHT setup
+
 
 //_______________________flag for saving data___________________________
 bool shouldSaveConfig = false;
@@ -40,29 +41,29 @@ void saveConfigCallback () {
 
 
 
-void httpGet(){  //รับค่าจาก Saver เป็น http gets
-    http.begin(IP + "/control/smartgarden/status");
+void httpGet(){  //รับค่าจาก Saver เป็น http get
+    http.begin(IP + "/control/smartgarden/status"); //url ที่รับค่ามา
     int httpCode = http.GET();                                             
     if(httpCode > 0){   //Check the returning code    
-      StaticJsonBuffer<300> jsonBuffer;
-      JsonObject& root = jsonBuffer.parseObject(http.getString());
-      String button = root["status"];   //Check JSON
+      StaticJsonBuffer<300> jsonBuffer;  //จองพื้นที่300ไบต์ ให้กับตัวแปร jsonBuffer
+      JsonObject& root = jsonBuffer.parseObject(http.getString()); //อ่านค่าจาก http get และมาเก็บในตัวแปร json root
+      String button = root["status"];   // ให้ปุ่ม Button = "status" ของjson
       //Serial.println(http.GET());
       
-        if(button == "ON" ){  // pumpทำงาน
+        if(button == "ON" ){  // เช็คสถานะ ว่ากดปุ่ม "ON" อยู่หรือไม่
           Serial.println(" SMART GARDEN : " + button );
-          digitalWrite(PIN,HIGH); // Pin D0 is HIGH
-          statusDevice = button;
+          digitalWrite(PIN,HIGH); // ให้ Relay ทำงาน
+          statusDevice = button; // ให้สถานะการทำงานของ solenoid valve = ON
           //delay(1000);
           //command
         }
-        else{
+        else{  // ถ้าไม่ 
           //command
           Serial.println(" SMART GARDEN : " + button );
-          digitalWrite(PIN,LOW); // Pin D0 is LOW
+          digitalWrite(PIN,LOW); // ให้สถานะการทำงานของ solenoid valve = OFF
           statusDevice = "OFF";
         }
-//    jsonBuffer.clear();
+   jsonBuffer.clear();  
    }
    http.end();   //Close connection
 }
@@ -73,11 +74,11 @@ void sensor(){
 //  float t = dht.readTemperature();
 //  float f = dht.readTemperature(true);
     sensors_event_t event;  
-    dht.temperature().getEvent(&event);
-    if (isnan(event.temperature)) {
+    dht.temperature().getEvent(&event); //
+    if (isnan(event.temperature)) {  //เช็คว่า sensor มีการอ่านค่าอยู่หรือไม่
       Serial.println("Error reading temperature!");
     }
-    else {
+    else { //เก็บค่าไว้ในตัวแปรอุณหภูมิ และ แสดงค่าผ่านทาง Serial
       Serial.print("Temperature: ");
       t = event.temperature;
       Serial.print(t);
@@ -88,23 +89,23 @@ void sensor(){
       Serial.print(" F\t");
     }
     // Get humidity event and print its value.
-    dht.humidity().getEvent(&event);
+    dht.humidity().getEvent(&event);  //เช็คว่า sensor มีการอ่านค่าอยู่หรือไม่
     if (isnan(event.relative_humidity)) {
       Serial.println("Error reading humidity!");
     }
-    else {
+    else {   //เก็บค่าไว้ในตัวแปรความชื้น และ แสดงค่าผ่านทาง Serial
       Serial.print("Humidity: ");
       h = event.relative_humidity;
       Serial.print(h);
-      
       Serial.print("%\t");
     }
+
    //________________________เซ็นเซอร์แสง____________________
-   lux = LightSensor.GetLightIntensity(); 
+   lux = LightSensor.GetLightIntensity();   //อ่านค่า Sensor แสง
   Serial.print("Light: "); Serial.print(lux); Serial.println(" lux");  //แสดงค่าความเข้มของแสงออกทาง serial
 }
 
-void toServer(){ 
+void toServer(){  //ส่งค่า Sensor ไปยัง Server ผ่าน http post
 //_____________________JSON HTTP______________________________________________________________________________________
       StaticJsonBuffer<500> JSONbuffer;   //Declaring static JSON buffer
       JsonObject& root = JSONbuffer.createObject(); 
@@ -139,16 +140,17 @@ void setup() {
   Serial.println();
   //_____________________________Ceonnect Wifi____________________________________________
 
-  WiFiManagerParameter custom_mqtt_server("server", "Server address", mqtt_server, 40);
-  //WiFiManager
+  //___________________________WiFiManager_________________________
+  WiFiManagerParameter custom_server("server", "Server address", server, 40);   
+  
   //Local intialization. Once its business is done, there is no need to keep it around
   WiFiManager wifiManager;
   //set config save notify callback
   wifiManager.setSaveConfigCallback(saveConfigCallback);
   //add all your parameters here
-  wifiManager.addParameter(&custom_mqtt_server);
+  wifiManager.addParameter(&custom_server);
   //reset settings - for testing
- // wifiManager.resetSettings();  //อย่าใส่ commnent ออก เพราะจะรีเซ็ตทุกครั้ง ...
+  wifiManager.resetSettings();  //อย่าใส่ commnent ออก เพราะจะรีเซ็ตทุกครั้ง ...
 
   if (!wifiManager.autoConnect("SMART_GARDEN", "admin")) {   //ssid & password เข้าตั้งค่า ip และหาข้อมูล
     Serial.println("failed to connect and hit timeout");
@@ -160,8 +162,8 @@ void setup() {
   //if you get here you have connected to the WiFi
   Serial.println("Connected!......  :)");
   //read updated parameters
-  strcpy(mqtt_server, custom_mqtt_server.getValue());
-  IP = String(mqtt_server); 
+  strcpy(server, custom_server.getValue());
+  IP = String(server); 
   Serial.println("local ip");
   Serial.println(WiFi.localIP());
   
@@ -174,12 +176,12 @@ void setup() {
 
 
 void loop() {
-   if (WiFi.status() == WL_CONNECTED) { 
+   if (WiFi.status() == WL_CONNECTED) {  //เช็คการเชื่อมต่อของ Wifi
     sensor();   //อ่านค่าจาก Sensor   
     httpGet(); //ส่งไปแสดงค่า ยังหน้าเว็บ
     toServer();  //ส่งข้อมูลไปเก็บยัง Data
     delay(500); //No more than 0.5 Hz sampling rate (once every 2 seconds)
-  }else {
-      Serial.println("Error in WiFi connection"); 
+  }else {   
+      Serial.println("Error in WiFi connection");  
     }
 }

@@ -5,33 +5,30 @@ export function setup(router){
     router.post('/remote/button_on_post',controller.ButtonOnPost) //เก็บค่าปุ่มจาก หน้าบ้าน...
 
     //________________________DECODE TV REMOTE___________________________
-    router.post('/api/remote_tv',controller.addTVRemote)
+    router.post('/api/remote_tv',controller.addTVRemote)  //เก็บข้อมูลจาก ESP8266
     router.post('/remote/decode/tv_remote',controller.decodeTVRemote)  //หน้าบ้านส่งปุ่มอะไรมา
     router.get('/remote/decode/tv_button',controller.decodeTVbutton)  //ส่งให้ ESP8266
 
     //________________________DECODE AC REMOTE___________________________
-    router.post('/api/remote_ac',controller.addACRemote)
-    router.post('/remote/decode/ac_remote',controller.decodeACRemote)
-    router.get('/remote/decode/ac_button',controller.decodeACbutton)
+    router.post('/api/remote_ac',controller.addACRemote) //เก็บข้อมูลจาก ESP8266
+    router.post('/remote/decode/ac_remote',controller.decodeACRemote) //หน้าบ้านส่งปุ่มอะไรมา
+    router.get('/remote/decode/ac_button',controller.decodeACbutton) //ส่งให้ ESP8266
+    //________________________DECODE FAN REMOTE___________________________
 
-    //________________________DECODE FAN REMOTE__________________________
-    router.post('/api/remote_fan',controller.addFanRemote)
-    
+
+
+    router.get('/remote_on/button',controller.getButton) //เเสดงปุ่มที่กดจากหน้าบ้าน  เพื่อให้ ESP8266 เช็ค
+
     //--------------------------------------------TV---------------------------------
-    router.get('/remote_on/button',controller.getButton)
-    router.get('/tv/:button',controller.getTVRemote)
-    // router.post('/remote_tv/tv_On_post',controller.addTvOnPost)
-    //--------------------------------------------FAN--------------------------------
-    //router.get('/remote_fan/button',controller.getButtonFan)
-    router.get('/fan/:button',controller.getFanRemote)
+    router.get('/tv/:button',controller.getTVRemote) //เรียกค่าจาก MySQL
     //-------------------------------------------AC----------------------------------
-    //router.get('/remote_ac/button',controller.getButtonAC)
-    router.get('/ac/:button',controller.getACRemote)
+    router.get('/ac/:button',controller.getACRemote) //เรียกค่าจาก MySQL
+    //-------------------------------------------FAN----------------------------------
 
 
     //_________________________SMART GARDEN_________________________________________
-    router.post('/api/smart_garden',controller.apiSmartGarden)
-    router.post('/smartgarden/on_off',controller.getSwitch)
-    router.get('/smartgarden',controller.showSmartGarden)
-    router.get('/smartgarden/status',controller.statusGarden)
+    router.post('/api/smart_garden',controller.apiSmartGarden)  //ส่งข้อมูล sensor ไปเก็บไว้ใน MySQL
+    router.post('/smartgarden/on_off',controller.getSwitch)  //เช็คว่ามีการกดปุ่มเปิด solenoid valve จากหน้าบ้านมาหรือไม่
+    router.get('/smartgarden',controller.showSmartGarden) //แสดงค่า sensor 
+    router.get('/smartgarden/status',controller.statusGarden) 
 }
